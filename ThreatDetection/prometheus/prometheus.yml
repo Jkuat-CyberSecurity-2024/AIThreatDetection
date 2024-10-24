@@ -1,0 +1,4 @@
+scrape_configs:
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx_prometheus_exporter:9113']  # Scraping from the exporter, not directly from stub_status

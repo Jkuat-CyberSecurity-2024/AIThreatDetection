@@ -1,20 +1,46 @@
 version: '3'
 services:
   nginx:
-    build: ./nginx  # Builds from the Dockerfile in the nginx folder
+      image: nginx:latest  # Use official NGINX image
+      volumes:
+        - ./nginx:/etc/nginx/conf.d
+        - static_volume:/app/static  # Serve static files
+        - media_volume:/app/media    # Serve media files
+        - ./nginx/log:/var/log/nginx  # For access log scraping
+      ports:
+        - "80:80"  # Expose NGINX on port 80
+      networks:
+        - backend-network
+
+  nginx_prometheus_exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    command:
+      - "-nginx.scrape-uri=http://nginx/stub_status"  # This URL points to the stub_status endpoint in the NGINX container
     ports:
-      - "80:80"  # Expose NGINX on port 80
-    networks:
-      - monitoring
+      - "9113:9113"  # Prometheus will scrape metrics from this port
     depends_on:
-      - django
+      - nginx
+    networks:
+      - backend-network
+
 
   django:
-    image: your_django_image  # Replace with your Django Docker image
+    build: .
+    volumes:
+      - .:/app  # Mount the current directory to /app in the container
+      - static_volume:/app/static  # Mount volume for static files
+      - media_volume:/app/media    # Mount volume for media files
+    depends_on:
+      - db
+      # - redis  # Uncomment if Redis is added
+    command: >
+      sh -c "python manage.py makemigrations && python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             daphne -b 0.0.0.0 -p 8000 ThreatDetection.asgi:application"
     ports:
-      - "8000:8000"  # Expose Django API on port 8000
+      - "8000:8000"
     networks:
-      - monitoring
+      - backend-network  # Ensures communication with other backend services
 
   prometheus:
     image: prom/prometheus:latest
@@ -23,19 +49,43 @@ services:
     ports:
       - "9090:9090"  # Expose Prometheus on port 9090
     networks:
-      - monitoring
+      - backend-network  # Prometheus on the same network as Django
 
   grafana:
     image: grafana/grafana:latest
     ports:
       - "3000:3000"  # Expose Grafana on port 3000
     networks:
-      - monitoring
+      - backend-network  # Grafana on the same network as Prometheus
     depends_on:
       - prometheus
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin  # Default admin password for Grafana
 
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=your_db_name
+      - POSTGRES_USER=your_db_user
+      - POSTGRES_PASSWORD=your_db_password
+    networks:
+      - backend-network  # Ensure the database is on the same network as Django
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persistent storage for the database
+
+  # Uncomment Redis if needed
+  # redis:
+  #   image: redis:alpine
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - backend-network
+
 networks:
-  monitoring:
+  backend-network:
     driver: bridge
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:

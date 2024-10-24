@@ -1,5 +1,3 @@
-
-# Create your models here.
 # detection/models.py
 
 from django.db import models
@@ -11,3 +9,5 @@ class ThreatData(models.Model):
     source_ip = models.GenericIPAddressField()  # Source IP of the threat
     processed = models.BooleanField(default=False)  # Whether the threat has been processed
 
+    def __str__(self):
+        return f"{self.description} ({self.threat_level}) - {self.source_ip}"

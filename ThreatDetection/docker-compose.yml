@@ -1,0 +1,41 @@
+version: '3'
+services:
+  nginx:
+    build: ./nginx  # Builds from the Dockerfile in the nginx folder
+    ports:
+      - "80:80"  # Expose NGINX on port 80
+    networks:
+      - monitoring
+    depends_on:
+      - django
+
+  django:
+    image: your_django_image  # Replace with your Django Docker image
+    ports:
+      - "8000:8000"  # Expose Django API on port 8000
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"  # Expose Prometheus on port 9090
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"  # Expose Grafana on port 3000
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # Default admin password for Grafana
+
+networks:
+  monitoring:
+    driver: bridge

@@ -8,6 +8,11 @@ services:
       - ./nginx/log:/var/log/nginx  # For access log scraping
     ports:
       - "80:80"  # Expose NGINX on port 80
+    depends_on:
+      - django-1
+      - django-2
+      - django-3
+
     networks:
       - backend-network
 
@@ -22,7 +27,7 @@ services:
     networks:
       - backend-network
 
-  django:
+  django-1:
     build: .
     volumes:
       - .:/app  # Mount the current directory to /app in the container
@@ -34,9 +39,44 @@ services:
     command: >
       sh -c "python manage.py makemigrations && python manage.py migrate &&
              python manage.py collectstatic --noinput &&
-             daphne -b 0.0.0.0 -p 8000 ThreatDetection.asgi:application"
+             gunicorn ThreatDetection.asgi:application -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000"
     ports:
-      - "8000:8000"
+      - "8001:8000"
+    networks:
+      - backend-network  # Ensures communication with other backend services
+  django-2:
+    build: .
+    volumes:
+      - .:/app  # Mount the current directory to /app in the container
+      - static_volume:/app/static  # Mount volume for static files
+      - media_volume:/app/media    # Mount volume for media files
+    depends_on:
+      - db
+      - redis  # Uncomment if Redis is added
+    command: >
+      sh -c "python manage.py makemigrations && python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn ThreatDetection.asgi:application -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000"
+    ports:
+      - "8002:8000"
+    networks:
+      - backend-network  # Ensures communication with other backend services
+
+  django-3:
+    build: .
+    volumes:
+      - .:/app  # Mount the current directory to /app in the container
+      - static_volume:/app/static  # Mount volume for static files
+      - media_volume:/app/media    # Mount volume for media files
+    depends_on:
+      - db
+      - redis  # Uncomment if Redis is added
+    command: >
+      sh -c "python manage.py makemigrations && python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn ThreatDetection.asgi:application -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000"
+    ports:
+      - "8003:8000"
     networks:
       - backend-network  # Ensures communication with other backend services
 

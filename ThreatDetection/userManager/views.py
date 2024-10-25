@@ -52,7 +52,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    http_method_names = ['get', 'head', 'options']
+    http_method_names = ['get', 'head', 'options','delete','patch']
 
     def get_object(self):
         """

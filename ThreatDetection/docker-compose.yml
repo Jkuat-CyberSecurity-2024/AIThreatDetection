@@ -66,9 +66,11 @@ services:
   db:
     image: postgres:13
     environment:
-      - POSTGRES_DB=your_db_name
-      - POSTGRES_USER=your_db_user
-      - POSTGRES_PASSWORD=your_db_password
+      - POSTGRES_DB=ThreatDetectionApp
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=TD_password
+    ports:
+      - "5432:5432"
     networks:
       - backend-network  # Ensure the database is on the same network as Django
     volumes:

@@ -2,9 +2,11 @@ import requests
 import random
 import time
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from multiprocessing import Process, current_process
+import signal
+import sys
 
 # API base URL
 BASE_URL = "http://localhost:80"
@@ -19,6 +21,9 @@ user_template = {
     "patient": {"email": "patient@example.com", "password": "PatientPass123"},
     "provider": {"email": "provider@example.com", "password": "ProviderPass123"},
 }
+
+# Global flag for gracefully stopping the simulation
+is_running = True
 
 # Load or initialize user data
 def load_user_data():
@@ -36,7 +41,7 @@ def save_user_data(data):
 # Log user activity to a file
 def log_activity(message):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    log_entry = f"[{timestamp}] {message}"
+    log_entry = f"[{timestamp}] [PID {current_process().pid}] {message}"
     print(log_entry)  # Prints log to console for live monitoring
     with open(LOG_FILE, "a") as log_file:
         log_file.write(log_entry + "\n")
@@ -46,6 +51,8 @@ user_data = load_user_data()
 tokens = user_data["tokens"]
 
 def create_user(user_type, user_id):
+    if not is_running:
+        return
     username = f"{user_type}_user_{user_id}"
     if username in user_data["users"]:
         log_activity(f"User '{username}' already exists. Skipping creation.")
@@ -72,6 +79,8 @@ def create_user(user_type, user_id):
     time.sleep(random.uniform(1, 2))
 
 def login_user(user_type, user_id):
+    if not is_running:
+        return
     username = f"{user_type}_user_{user_id}"
     log_activity(f"Logging in user '{username}'...")
     try:
@@ -94,6 +103,8 @@ def login_user(user_type, user_id):
     time.sleep(random.uniform(1, 2))
 
 def refresh_token(user_type, user_id):
+    if not is_running:
+        return
     username = f"{user_type}_user_{user_id}"
     refresh_token = tokens.get(username, {}).get("refresh")
     if not refresh_token:
@@ -114,7 +125,6 @@ def refresh_token(user_type, user_id):
         log_activity(f"Exception while refreshing token for user '{username}': {str(e)}")
 
 def perform_random_user_action(user_type, user_id):
-    """Simulates either data request, update, or deletion for a user."""
     actions = [get_user_data, update_user, delete_user]
     action = random.choice(actions)
     log_activity(f"User '{user_type}_user_{user_id}' performing action '{action.__name__}'...")
@@ -166,19 +176,36 @@ def delete_user(user_type, user_id):
         log_activity(f"Exception while deleting user '{username}': {str(e)}")
 
 def simulate_user_activity(user_type, user_id):
+    delay_start = random.uniform(1, 5)
+    log_activity(f"Delaying start of '{user_type}_user_{user_id}' simulation by {delay_start:.2f} seconds.")
+    time.sleep(delay_start)
     log_activity(f"Starting simulation for '{user_type}_user_{user_id}'...")
     create_user(user_type, user_id)
     login_user(user_type, user_id)
-    while True:
+    while is_running:
         perform_random_user_action(user_type, user_id)
         delay = random.uniform(60, 300)
         log_activity(f"User '{user_type}_user_{user_id}' waiting for {delay:.2f} seconds before next action...")
         time.sleep(delay)
 
+def signal_handler(sig, frame):
+    global is_running
+    log_activity("Simulation stopping gracefully...")
+    is_running = False
+    sys.exit(0)
+
 if __name__ == "__main__":
     log_activity("Starting user simulation...")
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        for user_type in user_template.keys():
-            for user_id in range(1, 4):  # Example: simulate three users per type
-                executor.submit(simulate_user_activity, user_type, user_id)
+    signal.signal(signal.SIGINT, signal_handler)  # Handle Ctrl+C interrupt
+
+    processes = []
+    for user_type in user_template.keys():
+        for user_id in range(1, 11):  # Example: simulate 10 users per type
+            process = Process(target=simulate_user_activity, args=(user_type, user_id))
+            process.start()
+            processes.append(process)
+    
+    for process in processes:
+        process.join()  # Wait for all processes to finish
+
     log_activity("User simulation terminated.")

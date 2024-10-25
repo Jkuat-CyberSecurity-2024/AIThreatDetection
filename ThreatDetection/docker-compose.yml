@@ -1,16 +1,15 @@
-version: '3'
 services:
   nginx:
-      image: nginx:latest  # Use official NGINX image
-      volumes:
-        - ./nginx:/etc/nginx/conf.d
-        - static_volume:/app/static  # Serve static files
-        - media_volume:/app/media    # Serve media files
-        - ./nginx/log:/var/log/nginx  # For access log scraping
-      ports:
-        - "80:80"  # Expose NGINX on port 80
-      networks:
-        - backend-network
+    image: nginx:latest  # Use official NGINX image
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - static_volume:/app/static  # Serve static files
+      - media_volume:/app/media    # Serve media files
+      - ./nginx/log:/var/log/nginx  # For access log scraping
+    ports:
+      - "80:80"  # Expose NGINX on port 80
+    networks:
+      - backend-network
 
   nginx_prometheus_exporter:
     image: nginx/nginx-prometheus-exporter:latest
@@ -22,7 +21,6 @@ services:
       - nginx
     networks:
       - backend-network
-
 
   django:
     build: .
@@ -46,6 +44,7 @@ services:
     image: prom/prometheus:latest
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus  # Persistent storage for Prometheus data
     ports:
       - "9090:9090"  # Expose Prometheus on port 9090
     networks:
@@ -53,6 +52,8 @@ services:
 
   grafana:
     image: grafana/grafana:latest
+    volumes:
+      - grafana_data:/var/lib/grafana  # Persistent storage for Grafana data
     ports:
       - "3000:3000"  # Expose Grafana on port 3000
     networks:
@@ -89,3 +90,5 @@ volumes:
   postgres_data:
   static_volume:
   media_volume:
+  prometheus_data:
+  grafana_data:

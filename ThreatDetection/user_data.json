@@ -1,0 +1,9 @@
+{
+    "tokens": {
+        "admin_user_1": {
+            "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI5ODQ3OTgyLCJpYXQiOjE3Mjk4NDc2ODIsImp0aSI6IjkyNjViNjFiYzFiZDRjNGY4ZThiNmU0Nzg0ZmM0NzY2IiwidXNlcl9pZCI6IjkxNzcwZGUwLWIzNDEtNDYzNi1hYjNjLTExMDI0NTNhM2FiZSJ9.uO9nL1-MwvUvKeukIGeOU6EAAjp8n1ni11BoWTl69WY",
+            "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcyOTkzNDA4MiwiaWF0IjoxNzI5ODQ3NjgyLCJqdGkiOiIwYzAyMGFiMWZlYTA0YTRiYjkwM2EyYjkyNjY5MWI1NSIsInVzZXJfaWQiOiI5MTc3MGRlMC1iMzQxLTQ2MzYtYWIzYy0xMTAyNDUzYTNhYmUifQ.8Zb6FmffvJV4bphAJnu1TfG5QN2BLoFopgwsl3EK9Oc"
+        }
+    },
+    "users": {}
+}

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Confirm Email</title>
+</head>
+<body>
+    <h1>Email Confirmation</h1>
+    <p>Please confirm your email address by clicking the button below.</p>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="key" value="{{ key }}">
+        <button type="submit">Confirm Email</button>
+    </form>
+    <p>If you did not request this confirmation, please ignore this message.</p>
+</body>
+</html>

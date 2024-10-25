@@ -11,6 +11,7 @@ BASE_URL = "http://localhost:80"
 
 # JSON file to store user data and tokens
 USER_DATA_FILE = "user_data.json"
+LOG_FILE = "user_activity_log.txt"
 
 # Sample data template for users
 user_template = {
@@ -32,15 +33,22 @@ def save_user_data(data):
     with open(USER_DATA_FILE, "w") as file:
         json.dump(data, file, indent=4)
 
+# Log user activity to a file
+def log_activity(message):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    log_entry = f"[{timestamp}] {message}"
+    print(log_entry)  # Prints log to console for live monitoring
+    with open(LOG_FILE, "a") as log_file:
+        log_file.write(log_entry + "\n")
+
 # Initialize user data
 user_data = load_user_data()
 tokens = user_data["tokens"]
 
 def create_user(user_type, user_id):
-    """Create a user with a specific type and ID."""
     username = f"{user_type}_user_{user_id}"
     if username in user_data["users"]:
-        print(f"{username} already exists. Skipping creation.")
+        log_activity(f"User '{username}' already exists. Skipping creation.")
         return
 
     user_info = {
@@ -50,139 +58,127 @@ def create_user(user_type, user_id):
         "password2": user_template[user_type]["password"],
         "user_type": user_type
     }
-    print(f"Creating {user_type} user {user_id}...")
-    response = requests.post(f"{BASE_URL}/register/", data=user_info)
-    if response.status_code == 201:
-        print(f"{user_type.capitalize()} user {user_id} created successfully.")
-        user_data["users"][username] = user_info
-        save_user_data(user_data)
-    else:
-        print(f"Failed to create {user_type} user {user_id}: {response.json()}")
+    log_activity(f"Creating user '{username}'...")
+    try:
+        response = requests.post(f"{BASE_URL}/register/", data=user_info)
+        if response.status_code == 201:
+            log_activity(f"User '{username}' created successfully.")
+            user_data["users"][username] = user_info
+            save_user_data(user_data)
+        else:
+            log_activity(f"Failed to create user '{username}': {response.json()}")
+    except Exception as e:
+        log_activity(f"Exception while creating user '{username}': {str(e)}")
     time.sleep(random.uniform(1, 2))
 
 def login_user(user_type, user_id):
-    """Log in a user and store both access and refresh tokens."""
     username = f"{user_type}_user_{user_id}"
-    print(f"Logging in {user_type} user {user_id}...")
-    response = requests.post(f"{BASE_URL}/login/", data={
-        "username": username,
-        "password": user_template[user_type]["password"]
-    })
-    if response.status_code == 200:
-        # Store both access and refresh tokens
-        tokens[username] = {
-            "access": response.json().get("access"),
-            "refresh": response.json().get("refresh")
-        }
-        user_data["tokens"] = tokens
-        save_user_data(user_data)
-        print(f"{user_type.capitalize()} user {user_id} logged in successfully.")
-    else:
-        print(f"Failed to log in {user_type} user {user_id}: {response.json()}")
+    log_activity(f"Logging in user '{username}'...")
+    try:
+        response = requests.post(f"{BASE_URL}/login/", data={
+            "username": username,
+            "password": user_template[user_type]["password"]
+        })
+        if response.status_code == 200:
+            tokens[username] = {
+                "access": response.json().get("access"),
+                "refresh": response.json().get("refresh")
+            }
+            user_data["tokens"] = tokens
+            save_user_data(user_data)
+            log_activity(f"User '{username}' logged in successfully.")
+        else:
+            log_activity(f"Failed to log in user '{username}': {response.json()}")
+    except Exception as e:
+        log_activity(f"Exception during login for user '{username}': {str(e)}")
     time.sleep(random.uniform(1, 2))
 
 def refresh_token(user_type, user_id):
-    """Refresh an expired token using the stored refresh token."""
     username = f"{user_type}_user_{user_id}"
     refresh_token = tokens.get(username, {}).get("refresh")
     if not refresh_token:
-        print(f"No refresh token found for {username}. Cannot refresh.")
+        log_activity(f"No refresh token found for '{username}'. Cannot refresh token.")
         return
 
-    response = requests.post(f"{BASE_URL}/token/refresh/", data={"refresh": refresh_token})
-    if response.status_code == 200:
-        tokens[username]["access"] = response.json().get("access")
-        user_data["tokens"] = tokens
-        save_user_data(user_data)
-        print(f"Token refreshed for {user_type} user {user_id}")
-    else:
-        print(f"Failed to refresh token for {user_type} user {user_id}: {response.json()}")
+    log_activity(f"Refreshing token for user '{username}'...")
+    try:
+        response = requests.post(f"{BASE_URL}/token/refresh/", data={"refresh": refresh_token})
+        if response.status_code == 200:
+            tokens[username]["access"] = response.json().get("access")
+            user_data["tokens"] = tokens
+            save_user_data(user_data)
+            log_activity(f"Token refreshed for user '{username}'.")
+        else:
+            log_activity(f"Failed to refresh token for user '{username}': {response.json()}")
+    except Exception as e:
+        log_activity(f"Exception while refreshing token for user '{username}': {str(e)}")
+
+def perform_random_user_action(user_type, user_id):
+    """Simulates either data request, update, or deletion for a user."""
+    actions = [get_user_data, update_user, delete_user]
+    action = random.choice(actions)
+    log_activity(f"User '{user_type}_user_{user_id}' performing action '{action.__name__}'...")
+    action(user_type, user_id)
 
 def get_user_data(user_type, user_id):
-    """Request user data multiple times."""
     username = f"{user_type}_user_{user_id}"
     headers = {"Authorization": f"Bearer {tokens.get(username, {}).get('access')}"}
-    for _ in range(random.randint(2, 5)):
-        print(f"Requesting data for {user_type} user {user_id}...")
+    log_activity(f"Fetching data for user '{username}'...")
+    try:
         response = requests.get(f"{BASE_URL}/user/", headers=headers)
         if response.status_code == 200:
-            print(f"{user_type.capitalize()} user {user_id} data: {response.json()}")
+            log_activity(f"Data for user '{username}' retrieved successfully.")
         elif response.status_code == 401 and "token_not_valid" in response.json().get("code", ""):
+            log_activity(f"Token for '{username}' expired; refreshing token...")
             refresh_token(user_type, user_id)
         else:
-            print(f"Failed to retrieve {user_type} user {user_id} data: {response.json()}")
-        time.sleep(random.uniform(1, 3))
+            log_activity(f"Failed to retrieve data for user '{username}': {response.json()}")
+    except Exception as e:
+        log_activity(f"Exception while fetching data for user '{username}': {str(e)}")
 
 def update_user(user_type, user_id):
-    """Update user data."""
     username = f"{user_type}_user_{user_id}"
     headers = {"Authorization": f"Bearer {tokens.get(username, {}).get('access')}"}
-    print(f"Updating {user_type} user {user_id}...")
-    new_data = {"email": f"updated_{username}@example.com"}
-    response = requests.patch(f"{BASE_URL}/user/pk/", headers=headers, data=new_data)
+    log_activity(f"Updating data for user '{username}'...")
     try:
+        response = requests.patch(f"{BASE_URL}/user/pk/", headers=headers, data={"email": f"updated_{username}@example.com"})
         if response.status_code == 200:
-            print(f"{user_type.capitalize()} user {user_id} updated successfully.")
+            log_activity(f"User '{username}' updated successfully.")
         else:
-            print(f"Failed to update {user_type} user {user_id}: {response.json()}")
-    except requests.JSONDecodeError:
-        print(f"Non-JSON response received during update for {user_type} user {user_id}")
-    time.sleep(random.uniform(1, 2))
-
-def logout_user(user_type, user_id):
-    """Log out a user."""
-    username = f"{user_type}_user_{user_id}"
-    headers = {"Authorization": f"Bearer {tokens.get(username, {}).get('access')}"}
-    print(f"Logging out {user_type} user {user_id}...")
-    response = requests.post(f"{BASE_URL}/logout/", headers=headers)
-    if response.status_code == 200:
-        print(f"{user_type.capitalize()} user {user_id} logged out successfully.")
-    else:
-        print(f"Failed to log out {user_type} user {user_id}: {response.json()}")
-    time.sleep(random.uniform(1, 2))
+            log_activity(f"Failed to update user '{username}': {response.json()}")
+    except Exception as e:
+        log_activity(f"Exception during update for user '{username}': {str(e)}")
 
 def delete_user(user_type, user_id):
-    """Delete user after a set time to simulate user account deletion."""
     username = f"{user_type}_user_{user_id}"
     headers = {"Authorization": f"Bearer {tokens.get(username, {}).get('access')}"}
-    print(f"Deleting {user_type} user {user_id}...")
-    response = requests.delete(f"{BASE_URL}/users/pk/", headers=headers)
-    if response.status_code == 204:
-        print(f"{user_type.capitalize()} user {user_id} deleted successfully.")
-        user_data["users"].pop(username, None)
-        user_data["tokens"].pop(username, None)
-        save_user_data(user_data)
-    else:
-        print(f"Failed to delete {user_type} user {user_id}: {response.json()}")
-    time.sleep(random.uniform(1, 2))
+    log_activity(f"Deleting user '{username}'...")
+    try:
+        response = requests.delete(f"{BASE_URL}/users/pk/", headers=headers)
+        if response.status_code == 204:
+            log_activity(f"User '{username}' deleted successfully.")
+            user_data["users"].pop(username, None)
+            user_data["tokens"].pop(username, None)
+            save_user_data(user_data)
+        else:
+            log_activity(f"Failed to delete user '{username}': {response.json()}")
+    except Exception as e:
+        log_activity(f"Exception while deleting user '{username}': {str(e)}")
 
 def simulate_user_activity(user_type, user_id):
-    """Simulate the entire lifecycle of a user type."""
+    log_activity(f"Starting simulation for '{user_type}_user_{user_id}'...")
     create_user(user_type, user_id)
     login_user(user_type, user_id)
-    get_user_data(user_type, user_id)
-    update_user(user_type, user_id)
-    get_user_data(user_type, user_id)
-    logout_user(user_type, user_id)
-
-    # Simulate delay before deletion
-    delete_after = datetime.now() + timedelta(seconds=random.randint(10, 20))
-    while datetime.now() < delete_after:
-        time.sleep(1)
-    delete_user(user_type, user_id)
+    while True:
+        perform_random_user_action(user_type, user_id)
+        delay = random.uniform(60, 300)
+        log_activity(f"User '{user_type}_user_{user_id}' waiting for {delay:.2f} seconds before next action...")
+        time.sleep(delay)
 
 if __name__ == "__main__":
-    # Simulate traffic for multiple users of each type
-    num_users_per_type = 3  # Number of users to simulate per user type
-    all_tasks = []
+    log_activity("Starting user simulation...")
     with ThreadPoolExecutor(max_workers=10) as executor:
         for user_type in user_template.keys():
-            for user_id in range(1, num_users_per_type + 1):
-                # Submit each user activity simulation as a separate task
-                future = executor.submit(simulate_user_activity, user_type, user_id)
-                all_tasks.append(future)
-                time.sleep(random.uniform(0.5, 2))  # Slight delay between task submissions
-
-        # Wait for all tasks to complete
-        for future in as_completed(all_tasks):
-            future.result()
+            for user_id in range(1, 4):  # Example: simulate three users per type
+                executor.submit(simulate_user_activity, user_type, user_id)
+    log_activity("User simulation terminated.")

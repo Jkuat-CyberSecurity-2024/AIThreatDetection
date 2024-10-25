@@ -32,5 +32,6 @@ urlpatterns = [
     path('', include('django_prometheus.urls')),
 
     # custom routes
-     path('api/', include('DetectionApp.urls')),
+    path('', include('userManager.urls')),
+    path('api/', include('DetectionApp.urls')),
 ]

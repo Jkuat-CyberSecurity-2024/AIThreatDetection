@@ -81,8 +81,11 @@ MIDDLEWARE = [
     # other middleware
     'django_prometheus.middleware.PrometheusAfterMiddleware',
     "allauth.account.middleware.AccountMiddleware",
+    'ThreatDetection.middleware.RedisActionTrackingMiddleware',
 
 ]
+
+PROMETHEUS_LATENCY_BUCKETS = (.1, .2, .5, 1, 2.5, 5, 7.5, 10, 30, 60)  # Custom latency buckets
 
 ROOT_URLCONF = 'ThreatDetection.urls'
 
@@ -133,7 +136,15 @@ CHANNEL_LAYERS = {
         },
     },
 }
-
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        "LOCATION": "redis://redis:6379/1",  # Replace 127.0.0.1 with redis
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 

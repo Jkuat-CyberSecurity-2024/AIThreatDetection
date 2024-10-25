@@ -4,9 +4,10 @@ import time
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # API base URL
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:80"
 
 # JSON file to store user data and tokens
 USER_DATA_FILE = "user_data.json"
@@ -145,7 +146,7 @@ def delete_user(user_type, user_id):
     username = f"{user_type}_user_{user_id}"
     headers = {"Authorization": f"Bearer {tokens.get(username, {}).get('access')}"}
     print(f"Deleting {user_type} user {user_id}...")
-    response = requests.delete(f"{BASE_URL}/user/", headers=headers)
+    response = requests.delete(f"{BASE_URL}/users/pk/", headers=headers)
     if response.status_code == 204:
         print(f"{user_type.capitalize()} user {user_id} deleted successfully.")
         user_data["users"].pop(username, None)
@@ -173,7 +174,15 @@ def simulate_user_activity(user_type, user_id):
 if __name__ == "__main__":
     # Simulate traffic for multiple users of each type
     num_users_per_type = 3  # Number of users to simulate per user type
-    for user_type in user_template.keys():
-        for user_id in range(1, num_users_per_type + 1):
-            simulate_user_activity(user_type, user_id)
-            time.sleep(random.uniform(2, 5))  # Delay between each user to simulate real network requests
+    all_tasks = []
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        for user_type in user_template.keys():
+            for user_id in range(1, num_users_per_type + 1):
+                # Submit each user activity simulation as a separate task
+                future = executor.submit(simulate_user_activity, user_type, user_id)
+                all_tasks.append(future)
+                time.sleep(random.uniform(0.5, 2))  # Slight delay between task submissions
+
+        # Wait for all tasks to complete
+        for future in as_completed(all_tasks):
+            future.result()

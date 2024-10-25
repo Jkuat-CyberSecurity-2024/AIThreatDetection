@@ -30,7 +30,7 @@ services:
       - media_volume:/app/media    # Mount volume for media files
     depends_on:
       - db
-      # - redis  # Uncomment if Redis is added
+      - redis  # Uncomment if Redis is added
     command: >
       sh -c "python manage.py makemigrations && python manage.py migrate &&
              python manage.py collectstatic --noinput &&
@@ -74,13 +74,22 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data  # Persistent storage for the database
 
-  # Uncomment Redis if needed
-  # redis:
-  #   image: redis:alpine
-  #   ports:
-  #     - "6379:6379"
-  #   networks:
-  #     - backend-network
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - backend-network
+  redis_exporter:
+    image: oliver006/redis_exporter
+    command:
+      - "--redis.addr=redis:6379"
+    ports:
+      - "9121:9121"
+    depends_on:
+      - redis
+    networks:
+      - backend-network
 
 networks:
   backend-network:

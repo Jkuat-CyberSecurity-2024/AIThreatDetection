@@ -1,4 +1,14 @@
 scrape_configs:
   - job_name: 'nginx'
     static_configs:
-      - targets: ['nginx_prometheus_exporter:9113']  # Scraping from the exporter, not directly from stub_status
+      - targets: ['nginx_prometheus_exporter:9113']
+
+  - job_name: 'django'
+    metrics_path: '/metrics'  # Specify Django metrics path
+    static_configs:
+      - targets: ['django:8000']  # Ensure Django exposes metrics on /metrics
+
+  - job_name: 'redis'
+    metrics_path: '/metrics'  # Adjust if Redis Exporter has a different path
+    static_configs:
+      - targets: ['redis_exporter:9121']  # Target the Redis Exporter

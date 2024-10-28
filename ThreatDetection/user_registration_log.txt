@@ -1,0 +1,4 @@
+[2024-10-26 18:27:17] Error during registration of 'provider_user_9': HTTPConnectionPool(host='localhost', port=80): Max retries exceeded with url: /register/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000010F99B712E0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+[2024-10-26 18:27:17] Waiting for 32.54 seconds before creating the next user...
+[2024-10-26 18:27:49] All users have been deleted. Exiting the simulation.
+[2024-10-26 18:27:49] User registration and login completed.

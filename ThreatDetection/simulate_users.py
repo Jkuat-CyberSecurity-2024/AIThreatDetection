@@ -5,21 +5,22 @@ import time
 import os
 from datetime import datetime
 from pathlib import Path
-from multiprocessing import Process, Lock
+from multiprocessing import Process, Lock, Manager
 from requests.exceptions import RequestException
 
 # Constants
-BASE_URL = os.getenv("BASE_URL", "http://localhost:80/")  # Base URL for API
-REGISTER_URL = f"{BASE_URL}register/"  # Registration endpoint
-LOGIN_URL = f"{BASE_URL}login/"  # Login endpoint
-USER_DATA_URL = f"{BASE_URL}users/pk/"  # User data retrieval endpoint
-PATCH_USER_URL = f"{BASE_URL}users/pk/"  # Endpoint for patching user data
-LOGOUT_URL = f"{BASE_URL}logout/"  # Logout endpoint
-DELETE_USER_URL = f"{BASE_URL}users/pk/"  # Delete user endpoint
+BASE_URL = os.getenv("BASE_URL", "http://localhost:80/")
+REGISTER_URL = f"{BASE_URL}register/"
+LOGIN_URL = f"{BASE_URL}login/"
+USER_DATA_URL = f"{BASE_URL}users/pk/"
+PATCH_USER_URL = f"{BASE_URL}users/pk/"
+LOGOUT_URL = f"{BASE_URL}logout/"
+DELETE_USER_URL = f"{BASE_URL}users/pk/"
 USER_DATA_FILE = "user_data.json"
 LOG_FILE = "user_registration_log.txt"
-MAX_USERS_PER_TYPE = int(os.getenv("MAX_USERS_PER_TYPE", 3))  # Max users per type, configurable
-RETRY_LIMIT = 3  # Number of retries for HTTP requests
+MAX_USERS = 20
+MAX_USERS_PER_TYPE = int(os.getenv("MAX_USERS_PER_TYPE", 3))
+RETRY_LIMIT = 3
 
 # User template with example credentials
 user_template = {
@@ -28,14 +29,13 @@ user_template = {
     "provider": {"email": "provider@example.com", "password": "ProviderPass123"},
 }
 
-# Initialize user data storage
-file_lock = Lock()  # Lock for synchronized file access
+file_lock = Lock()
 
 # Function to log messages
 def log_activity(message):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     log_entry = f"[{timestamp}] {message}"
-    print(log_entry)  # Print to console for live monitoring
+    print(log_entry)
     with open(LOG_FILE, "a") as log_file:
         log_file.write(log_entry + "\n")
 
@@ -54,11 +54,10 @@ def save_user_data(data):
 
 # Function to create a user
 def create_user(user_data, user_type):
-    username = f"{user_type}_user_{len(user_data['users']) + 1}"  # Generate a unique username
-    email = f"{username}@example.com"
+    username = f"{user_type}_user_{len(user_data['users']) + 1}"
+    email = f"{username}_{random.randint(1000, 9999)}@example.com"
     password = user_template[user_type]["password"]
-    
-    # Registration payload with all required fields
+
     user_info = {
         "username": username,
         "email": email,
@@ -67,16 +66,17 @@ def create_user(user_data, user_type):
         "user_type": user_type
     }
 
-    # Simulate registration
     try:
         response = make_request(REGISTER_URL, method='post', data=user_info)
-        if response and response.get("status_code") == 201:
+
+        if response and 'user' in response:
             log_activity(f"User '{username}' created successfully.")
             user_data["users"][username] = user_info
-            save_user_data(user_data)
-            return username  # Return the created username for login
+            save_user_data(user_data)  # Save immediately after creation
+            return username
         else:
-            log_activity(f"Failed to create user '{username}': {response.get('text', 'Unknown error')}")
+            error_message = response.get('text', 'Unknown error') if response else 'No response'
+            log_activity(f"Failed to create user '{username}': {error_message}")
             return None
     except Exception as e:
         log_activity(f"Error during registration of '{username}': {str(e)}")
@@ -84,7 +84,6 @@ def create_user(user_data, user_type):
 
 # Function to login a user and store tokens
 def login_user(user_data, username):
-    # Ensure username exists in user_data
     if username not in user_data["users"]:
         log_activity(f"User '{username}' not found in user data.")
         return None
@@ -97,15 +96,15 @@ def login_user(user_data, username):
 
     try:
         response = make_request(LOGIN_URL, method='post', data=login_info)
-        if response and response.get("status_code") == 200:
+        if response and 'access' in response:
             tokens = response
             user_data["tokens"][username] = {
                 "access": tokens.get("access"),
                 "refresh": tokens.get("refresh")
             }
-            save_user_data(user_data)
+            save_user_data(user_data)  # Update user tokens in the file
             log_activity(f"User '{username}' logged in successfully. Tokens stored.")
-            return tokens.get("access")  # Return access token
+            return tokens.get("access")
         else:
             log_activity(f"Failed to log in user '{username}': {response.get('text', 'Unknown error')}")
             return None
@@ -113,45 +112,13 @@ def login_user(user_data, username):
         log_activity(f"Error during login of '{username}': {str(e)}")
         return None
 
-# Function to simulate user actions
-def simulate_user_activity(username, user_data):
-    access_token = login_user(user_data, username)
-    if access_token is None:
-        return  # Exit if login fails
-
-    while True:
-        action = random.choices(
-            ["get_user_data", "update_user_data", "logout", "delete_user"],
-            weights=[0.6, 0.3, 0.05, 0.05],  # Weighting for actions
-            k=1
-        )[0]
-
-        if action == "get_user_data":
-            get_user_data(username, access_token)
-
-        elif action == "update_user_data":
-            update_user_data(username, access_token)
-
-        elif action == "logout":
-            logout_user(username, access_token)
-            break  # Exit loop after logging out
-
-        elif action == "delete_user":
-            delete_user(username, access_token)
-            break  # Exit loop after deletion
-
-        # Random delay before the next action
-        delay = random.uniform(5, 15)
-        log_activity(f"User '{username}' waiting for {delay:.2f} seconds before next action...")
-        time.sleep(delay)
-
 # Function to get user data
 def get_user_data(username, access_token):
     headers = {"Authorization": f"Bearer {access_token}"}
     try:
         response = requests.get(USER_DATA_URL, headers=headers)
         if response.status_code == 200:
-            log_activity(f"User '{username}' fetched data successfully: {response.json()}")
+            log_activity(f"User '{username}' fetched data successfully.")
         else:
             log_activity(f"Failed to fetch data for user '{username}': {response.text}")
     except Exception as e:
@@ -160,9 +127,7 @@ def get_user_data(username, access_token):
 # Function to update user data
 def update_user_data(username, access_token):
     headers = {"Authorization": f"Bearer {access_token}"}
-    new_data = {
-        "email": f"updated_{username}@example.com",  # Simulate an update
-    }
+    new_data = {"email": f"updated_{username}@example.com"}
     try:
         response = requests.patch(PATCH_USER_URL, headers=headers, json=new_data)
         if response.status_code == 200:
@@ -179,6 +144,9 @@ def logout_user(username, access_token):
         response = requests.post(LOGOUT_URL, headers=headers)
         if response.status_code == 200:
             log_activity(f"User '{username}' logged out successfully.")
+        user_data = load_user_data()
+        if username in user_data["tokens"]:
+            del user_data["tokens"][username]
         else:
             log_activity(f"Failed to logout user '{username}': {response.text}")
     except Exception as e:
@@ -191,14 +159,72 @@ def delete_user(username, access_token):
         response = requests.delete(DELETE_USER_URL, headers=headers)
         if response.status_code == 204:
             log_activity(f"User '{username}' deleted successfully.")
+            user_data = load_user_data()
+            if username in user_data["users"]:
+                del user_data["users"][username]
+            if username in user_data["tokens"]:
+                del user_data["tokens"][username]
+            save_user_data(user_data)  # Save after deletion
         else:
             log_activity(f"Failed to delete user '{username}': {response.text}")
     except Exception as e:
         log_activity(f"Error deleting '{username}': {str(e)}")
 
+# Function to simulate random API traffic
+def simulate_traffic(username, user_data, active_user_count):
+    access_token = login_user(user_data, username)
+    if access_token is None:
+        return
+
+    while True:
+        action = random.choices(
+            ["get_user_data", "update_user_data", "logout", "delete_user"],
+            weights=[0.6, 0.3, 0.05, 0.05],
+            k=1
+        )[0]
+
+        if action == "get_user_data":
+            get_user_data(username, access_token)
+        elif action == "update_user_data":
+            update_user_data(username, access_token)
+        elif action == "logout":
+            logout_user(username, access_token)
+            break
+        elif action == "delete_user":
+            delete_user(username, access_token)
+            active_user_count.value -= 1  # Decrease user count on deletion
+            break
+
+        delay = random.uniform(2, 10)
+        log_activity(f"User '{username}' waiting for {delay:.2f} seconds before next action...")
+        time.sleep(delay)
+
+# Function to manage user creation and traffic simulation
+def manage_traffic():
+    user_data = load_user_data()
+    active_user_count = Manager().Value('i', len(user_data["users"]))
+
+    while True:
+        user_data = load_user_data()
+        
+        if active_user_count.value < MAX_USERS:
+            for user_type in user_template.keys():
+                if active_user_count.value >= MAX_USERS:
+                    break
+
+                username = create_user(user_data, user_type)
+                if username:
+                    p = Process(target=simulate_traffic, args=(username, user_data, active_user_count))
+                    p.start()
+                    active_user_count.value += 1
+
+                time.sleep(random.uniform(5, 15))  # Stagger user creation for variability
+
+        time.sleep(5)  # Polling delay before checking user count again
+
 # Helper function to make HTTP requests with retries
 def make_request(url, method='get', data=None):
-    for attempt in range(RETRY_LIMIT):  # Retry up to RETRY_LIMIT times
+    for attempt in range(RETRY_LIMIT):
         try:
             if method.lower() == 'post':
                 response = requests.post(url, json=data)
@@ -207,49 +233,14 @@ def make_request(url, method='get', data=None):
             else:
                 response = requests.get(url)
             
-            response.raise_for_status()  # Raise an error for bad responses
-            return response.json()  # Return the JSON response
+            response.raise_for_status()
+            return response.json()
         except RequestException as e:
             log_activity(f"Error during {method.upper()} request to '{url}': {str(e)}")
-            time.sleep(2 ** attempt)  # Exponential backoff
-    return None  # Return None if all retries fail
-
-# Main function to register users and log them in
-def register_and_login_users():
-    user_data = load_user_data()  # Load existing user data
-
-    # Only create new users if there are no existing users
-    if len(user_data["users"]) == 0:
-        for user_type in user_template.keys():
-            for _ in range(MAX_USERS_PER_TYPE):  # Create users for each user type
-                username = create_user(user_data, user_type)
-                if username:  # If user creation was successful
-                    # Start user simulation immediately after creation
-                    p = Process(target=simulate_user_activity, args=(username, user_data,))
-                    p.start()  # Start a new process for each user
-                # Stagger the creation of users by waiting for a random period between 10 to 40 seconds
-                delay = random.uniform(10, 40)
-                log_activity(f"Waiting for {delay:.2f} seconds before creating the next user...")
-                time.sleep(delay)
-
-    # Continuously simulate user activity for existing users
-    while True:
-        user_data = load_user_data()  # Reload user data to check for existing users
-        processes = []
-        for username in user_data["users"].keys():
-            p = Process(target=simulate_user_activity, args=(username, user_data,))
-            p.start()  # Start a new process for each user
-            processes.append(p)
-
-        for p in processes:
-            p.join()  # Wait for all user processes to finish
-
-        # Check if there are any users left
-        if not user_data["users"]:
-            log_activity("All users have been deleted. Exiting the simulation.")
-            break  # Exit loop if no users are left
+            time.sleep(2 ** attempt)
+    return None
 
 if __name__ == "__main__":
-    log_activity("Starting user registration and login...")
-    register_and_login_users()
-    log_activity("User registration and login completed.")
+    log_activity("Starting traffic generation...")
+    manage_traffic()
+    log_activity("Traffic generation completed.")

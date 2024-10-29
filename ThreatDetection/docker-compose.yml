@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   nginx:
     image: nginx:latest  # Use official NGINX image
@@ -12,9 +14,21 @@ services:
       - django-1
       - django-2
       - django-3
-
     networks:
       - backend-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "512M"
+        reservations:
+          cpus: "0.2"
+          memory: "256M"
 
   nginx_prometheus_exporter:
     image: nginx/nginx-prometheus-exporter:latest
@@ -26,59 +40,113 @@ services:
       - nginx
     networks:
       - backend-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9113/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   django-1:
     build: .
     volumes:
       - .:/app  # Mount the current directory to /app in the container
-      - static_volume:/app/static  # Mount volume for static files
-      - media_volume:/app/media    # Mount volume for media files
+      - static_volume:/app/static
+      - media_volume:/app/media
     depends_on:
       - db
-      - redis  # Uncomment if Redis is added
-    command: >
-      sh -c "python manage.py makemigrations && python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             gunicorn ThreatDetection.asgi:application -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000"
+      - redis
+    command:
+      - sh
+      - -c
+      - |
+          python manage.py migrate &&
+          python manage.py collectstatic --noinput &&
+          daphne -b 0.0.0.0 -p 8000 ThreatDetection.asgi:application
     ports:
       - "8001:8000"
     networks:
-      - backend-network  # Ensures communication with other backend services
+      - backend-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "1024M"
+        reservations:
+          cpus: "0.5"
+          memory: "512M"
+
   django-2:
     build: .
     volumes:
       - .:/app  # Mount the current directory to /app in the container
-      - static_volume:/app/static  # Mount volume for static files
-      - media_volume:/app/media    # Mount volume for media files
+      - static_volume:/app/static
+      - media_volume:/app/media
     depends_on:
       - db
-      - redis  # Uncomment if Redis is added
-    command: >
-      sh -c "python manage.py makemigrations && python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             gunicorn ThreatDetection.asgi:application -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000"
+      - redis
+    command:
+      - sh
+      - -c
+      - |
+          python manage.py migrate &&
+          python manage.py collectstatic --noinput &&
+          daphne -b 0.0.0.0 -p 8000 ThreatDetection.asgi:application
     ports:
       - "8002:8000"
     networks:
-      - backend-network  # Ensures communication with other backend services
+      - backend-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "1024M"
+        reservations:
+          cpus: "0.5"
+          memory: "512M"
 
   django-3:
     build: .
     volumes:
       - .:/app  # Mount the current directory to /app in the container
-      - static_volume:/app/static  # Mount volume for static files
-      - media_volume:/app/media    # Mount volume for media files
+      - static_volume:/app/static
+      - media_volume:/app/media
     depends_on:
       - db
-      - redis  # Uncomment if Redis is added
-    command: >
-      sh -c "python manage.py makemigrations && python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             gunicorn ThreatDetection.asgi:application -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000"
+      - redis
+    command:
+      - sh
+      - -c
+      - |
+          python manage.py migrate &&
+          python manage.py collectstatic --noinput &&
+          daphne -b 0.0.0.0 -p 8000 ThreatDetection.asgi:application
     ports:
       - "8003:8000"
     networks:
-      - backend-network  # Ensures communication with other backend services
+      - backend-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "1024M"
+        reservations:
+          cpus: "0.5"
+          memory: "512M"
 
   prometheus:
     image: prom/prometheus:latest
@@ -88,7 +156,12 @@ services:
     ports:
       - "9090:9090"  # Expose Prometheus on port 9090
     networks:
-      - backend-network  # Prometheus on the same network as Django
+      - backend-network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "512M"
 
   grafana:
     image: grafana/grafana:latest
@@ -97,11 +170,16 @@ services:
     ports:
       - "3000:3000"  # Expose Grafana on port 3000
     networks:
-      - backend-network  # Grafana on the same network as Prometheus
+      - backend-network
     depends_on:
       - prometheus
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin  # Default admin password for Grafana
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "256M"
 
   db:
     image: postgres:13
@@ -112,9 +190,16 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - backend-network  # Ensure the database is on the same network as Django
+      - backend-network
     volumes:
       - postgres_data:/var/lib/postgresql/data  # Persistent storage for the database
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "1024M"
+      restart_policy:
+        condition: on-failure
 
   redis:
     image: redis:alpine
@@ -122,6 +207,12 @@ services:
       - "6379:6379"
     networks:
       - backend-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "256M"
+
   redis_exporter:
     image: oliver006/redis_exporter
     command:
@@ -139,7 +230,12 @@ networks:
 
 volumes:
   postgres_data:
+    driver: local
   static_volume:
+    driver: local
   media_volume:
+    driver: local
   prometheus_data:
+    driver: local
   grafana_data:
+    driver: local

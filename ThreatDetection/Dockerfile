@@ -14,9 +14,6 @@ COPY requirements.txt /app/
 # Install the dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install gunicorn and uvicorn if not already in requirements.txt
-RUN pip install gunicorn uvicorn
-
 # Copy the entire Django project into the container
 COPY . /app/
 
@@ -32,7 +29,7 @@ EXPOSE 8000
 # Install Daphne or Uvicorn (depending on the one you're using) for running ASGI
 # Make sure you already added `channels` and `daphne`/`uvicorn` to requirements.txt
 # If using Daphne:
-# CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "ThreatDetection.asgi:application"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "ThreatDetection.asgi:application"]
 
 # Alternatively, if using Uvicorn, replace the above CMD with:
-CMD ["gunicorn", "ThreatDetection.asgi:application", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000"]
+# CMD ["gunicorn", "ThreatDetection.asgi:application", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000"]

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Access Logs</title>
+    <style>
+        body {
+            --nav-height: 40px;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #e9ecef;
+        }
+        .nav {
+            height: var(--nav-height);
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .nav a {
+            text-decoration: none;
+            color: #007bff;
+            margin-right: 15px;
+        }
+        .upper-section, .lower-section {
+            flex: 1; /* Adjusted flex to 1 for equal distribution */
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin: 10px;
+        }
+        .lower-section {
+            border-top: 1px solid #dee2e6;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .anomaly {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - var(--nav-height));
+            padding: 10px;
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="{% url 'access_logs' %}">View Access Logs</a>
+        <!-- <a href="{% url 'review_anomalies' %}">Review Anomalies</a> -->
+    </div>
+    
+    <div class="content-wrapper">
+        <div class="upper-section">
+            <h2>Top 10 Access Logs with Anomaly Status</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>IP Address</th>
+                        <th>Timestamp</th>
+                        <th>Method</th>
+                        <th>Resource</th>
+                        <th>Protocol</th>
+                        <th>Status Code</th>
+                        <th>Source Port</th>
+                        <th>Destination Port</th>
+                        <th>Origin Server</th>
+                        <th>Destination</th>
+                        <th>Response Code</th>
+                        <th>Response Time</th>
+                        <th>Backend Time</th>
+                        <th>Anomaly Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in access_logs|slice:":10" %}
+                    <tr class="{% if log.anomaly %}anomaly{% endif %}">
+                        <td>{{ log.ip_address }}</td>
+                        <td>{{ log.timestamp }}</td>
+                        <td>{{ log.method }}</td>
+                        <td>{{ log.resource }}</td>
+                        <td>{{ log.protocol }}</td>
+                        <td>{{ log.status_code }}</td>
+                        <td>{{ log.source_port }}</td>
+                        <td>{{ log.destination_port }}</td>
+                        <td>{{ log.origin_server }}</td>
+                        <td>{{ log.destination }}</td>
+                        <td>{{ log.response_code }}</td>
+                        <td>{{ log.response_time }}</td>
+                        <td>{{ log.backend_time }}</td>
+                        <td>
+                            {% if log.anomaly %}
+                                Anomaly
+                            {% else %}
+                                Normal
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="lower-section">
+            <h2>Anomalies in the System</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>IP Address</th>
+                        <th>Timestamp</th>
+                        <th>Anomaly Details</th>
+                        <th>Feedback</th>
+                        <th>Reviewed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for anomaly in anomalies %}
+                    <tr>
+                        <td>{{ anomaly.ip_address }}</td>
+                        <td>{{ anomaly.timestamp }}</td>
+                        <td>{{ anomaly.anomaly_data|json_script:"anomaly-data" }}</td>
+                        <td>{{ anomaly.feedback }}</td>
+                        <td>{{ anomaly.reviewed|yesno:"Yes,No" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

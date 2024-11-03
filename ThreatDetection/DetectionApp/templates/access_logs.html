@@ -2,348 +2,151 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Access Logs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threat Detection Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* General styling */
         body {
-            --nav-height: 40px;
-            --sidebar-width: 200px;
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
             display: flex;
-            flex-direction: column;
             height: 100vh;
+            color: #2e7d32;
             background-color: #e9ecef;
         }
-        .nav {
-            height: var(--nav-height);
-            padding: 0 10px;
-            display: flex;
-            align-items: center;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .nav a {
-            text-decoration: none;
-            color: #007bff;
-            margin-right: 15px;
-        }
-        .main-container {
-            display: flex;
-            height: calc(100vh - var(--nav-height));
-        }
+
+        /* Sidebar styling */
         .sidebar {
-            width: var(--sidebar-width);
-            background-color: #f8f9fa;
-            border-right: 1px solid #dee2e6;
-            padding: 20px;
-            overflow-y: auto;
-            transition: margin-left 0.3s ease-in-out;
-        }
-        .sidebar.hidden {
-            margin-left: calc(var(--sidebar-width) * -1);
-        }
-        .sidebar h3 {
-            margin-top: 0;
-        }
-        .sidebar ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        .sidebar li {
-            margin-bottom: 10px;
-        }
-        .sidebar a {
-            text-decoration: none;
-            color: #007bff;
-            display: flex;
-            align-items: center;
-        }
-        .sidebar a svg {
-            margin-right: 10px;
-            width: 24px;
-            height: 24px;
-        }
-        .content-wrapper {
-            flex: 1;
+            width: 250px;
+            background-color: #1b5e20;
+            color: white;
             display: flex;
             flex-direction: column;
-            padding: 10px;
-            background-color: #e9ecef;
-            overflow-y: auto;
-            transition: margin-left 0.3s ease-in-out;
+            align-items: center;
+            padding-top: 20px;
+            position: fixed;
+            height: 100vh;
         }
-        .upper-section, .lower-section {
-            flex: 1;
+
+        .sidebar a {
+            width: 100%;
+            padding: 15px;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background-color: #388e3c;
+        }
+
+        .sidebar i {
+            margin-right: 10px;
+        }
+
+        /* Content area */
+        .content-wrapper {
+            margin-left: 250px;
+            padding: 20px;
+            width: calc(100% - 250px);
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: 100vh;
+        }
+
+        .section {
             padding: 20px;
             background-color: #f8f9fa;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
-            margin: 10px;
         }
-        .lower-section {
-            border-top: 1px solid #dee2e6;
+
+        .section h2 {
+            margin: 0;
+            margin-bottom: 15px;
+            color: #1b5e20;
         }
+
+        /* Table styling */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
         }
+
         th, td {
-            border: 1px solid #dddddd;
-            padding: 8px;
+            padding: 10px;
+            border: 1px solid #dee2e6;
             text-align: center;
+            font-size: 14px;
         }
+
         th {
-            background-color: #f2f2f2;
+            background-color: #f1f8e9;
             position: sticky;
             top: 0;
             z-index: 10;
         }
+
+        tr:nth-child(even) {
+            background-color: #f1f8e9;
+        }
+
         .anomaly {
             background-color: #f8d7da;
             color: #721c24;
         }
-        h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
-        #sidebarToggle {
-            position: static;
-            margin-bottom: 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px;
+
+        /* Tooltip styling */
+        .tooltip {
+            position: relative;
+            display: inline-block;
             cursor: pointer;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
             border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
         }
     </style>
 </head>
 <body>
-    <!-- <div class="nav">
-        <a href="{% url 'access_logs' %}">View Access Logs</a> -->
-        <!-- <a href="{% url 'review_anomalies' %}">Review Anomalies</a> -->
-    <!-- </div> -->
-    
-    <div class="main-container">
-        <div class="sidebar" id="sidebar">
-            <h3>Navigation</h3>
-            <ul>
-                <li>
-                    <a href="{% url 'access_logs' %}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
-                        Access Logs
-                    </a>
-                </li>
-                <li>
-                    <a href="#anomalies">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
-                        Anomalies
-                    </a>
-                </li>
-                <li>
-                    <a href="#settings">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                        Settings
-                    </a>
-                </li>
-                <li>
-                    <a href="#reports">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg>
-                        Reports
-                    </a>
-                </li>
-            </ul>
-        </div>
 
-        <div class="content-wrapper" id="content">
-            <!-- <button id="sidebarToggle">Toggle Sidebar</button> -->
-            <div class="upper-section" id="access-logs">
-                <h2>Top 10 Access Logs with Anomaly Status</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>IP Address</th>
-                            <th>Timestamp</th>
-                            <th>Method</th>
-                            <th>Resource</th>
-                            <th>Protocol</th>
-                            <th>Status Code</th>
-                            <th>Source Port</th>
-                            <th>Destination Port</th>
-                            <th>Origin Server</th>
-                            <th>Destination</th>
-                            <th>Response Code</th>
-                            <th>Response Time</th>
-                            <th>Backend Time</th>
-                            <th>Anomaly Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for log in access_logs|slice:":10" %}
-                        <tr class="{% if log.anomaly %}anomaly{% endif %}">
-                            <td>{{ log.ip_address }}</td>
-                            <td>{{ log.timestamp }}</td>
-                            <td>{{ log.method }}</td>
-                            <td>{{ log.resource }}</td>
-                            <td>{{ log.protocol }}</td>
-                            <td>{{ log.status_code }}</td>
-                            <td>{{ log.source_port }}</td>
-                            <td>{{ log.destination_port }}</td>
-                            <td>{{ log.origin_server }}</td>
-                            <td>{{ log.destination }}</td>
-                            <td>{{ log.response_code }}</td>
-                            <td>{{ log.response_time }}</td>
-                            <td>{{ log.backend_time }}</td>
-                            <td>
-                                {% if log.anomaly %}
-                                    Anomaly
-                                {% else %}
-                                    Normal
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="lower-section" id="anomalies">
-                <h2>Anomalies in the System</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>IP Address</th>
-                            <th>Timestamp</th>
-                            <th>Anomaly Details</th>
-                            <th>Feedback</th>
-                            <th>Reviewed</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for anomaly in anomalies %}
-                        <tr>
-                            <td>{{ anomaly.ip_address }}</td>
-                            <td>{{ anomaly.timestamp }}</td>
-                            <td>{{ anomaly.anomaly_data|json_script:"anomaly-data" }}</td>
-                            <td>{{ anomaly.feedback }}</td>
-                            <td>{{ anomaly.reviewed|yesno:"Yes,No" }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h2>Dashboard</h2>
+        <a href="{% url 'access_logs' %}" class="active"><i class="fas fa-file-alt"></i> Access Logs</a>
+        <a href="{% url 'review_anomalies' %}"><i class="fas fa-exclamation-circle"></i> Review Anomalies</a>
+        <a href="#report"><i class="fas fa-chart-line"></i> Report</a>
+        <a href="#visualization"><i class="fas fa-chart-pie"></i> Visualization</a>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const sidebar = document.getElementById('sidebar');
-            const content = document.getElementById('content');
-
-            sidebarToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('hidden');
-                // sidebarToggle.classList.toggle('sidebar-hidden'); // Removed as it's no longer needed with static positioning
-                if (sidebar.classList.contains('hidden')) {
-                    content.style.marginLeft = '0';
-                    sidebarToggle.textContent = 'Show Sidebar';
-                } else {
-                    content.style.marginLeft = '';
-                    sidebarToggle.textContent = 'Hide Sidebar';
-                }
-            });
-        });
-    </script>
-</body>
-</html>
-
-
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Access Logs</title>
-    <style>
-        body {
-            --nav-height: 40px;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            background-color: #e9ecef;
-        }
-        .nav {
-            height: var(--nav-height);
-            padding: 0 10px;
-            display: flex;
-            align-items: center;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .nav a {
-            text-decoration: none;
-            color: #007bff;
-            margin-right: 15px;
-        }
-        .upper-section, .lower-section {
-            flex: 1; /* Adjusted flex to 1 for equal distribution */
-            overflow-y: auto;
-            padding: 20px;
-            background-color: #f8f9fa;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            margin: 10px;
-        }
-        .lower-section {
-            border-top: 1px solid #dee2e6;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            border: 1px solid #dddddd;
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #f2f2f2;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        .anomaly {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
-        .content-wrapper {
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - var(--nav-height));
-            padding: 10px;
-            background-color: #e9ecef;
-        }
-    </style>
-</head>
-<body>
-    <div class="nav">
-        <a href="{% url 'access_logs' %}">View Access Logs</a>
-        <!-- <a href="{% url 'review_anomalies' %}">Review Anomalies</a> -->
-    <!-- </div>
-    
+    <!-- Main Content Area -->
     <div class="content-wrapper">
-        <div class="upper-section">
+
+        <!-- Access Logs Section -->
+        <div class="section" id="access-logs">
             <h2>Top 10 Access Logs with Anomaly Status</h2>
             <table>
                 <thead>
@@ -353,8 +156,8 @@
                         <th>Method</th>
                         <th>Resource</th>
                         <th>Protocol</th>
-                        <th>Status Code</th> -->
-                        <!-- <th>Source Port</th>
+                        <th>Status Code</th>
+                        <th>Source Port</th>
                         <th>Destination Port</th>
                         <th>Origin Server</th>
                         <th>Destination</th>
@@ -382,7 +185,9 @@
                         <td>{{ log.backend_time }}</td>
                         <td>
                             {% if log.anomaly %}
-                                Anomaly
+                                <span class="tooltip">Anomaly
+                                    <span class="tooltip-text">Detected as potential threat</span>
+                                </span>
                             {% else %}
                                 Normal
                             {% endif %}
@@ -393,7 +198,8 @@
             </table>
         </div>
 
-        <div class="lower-section">
+        <!-- Anomalies Section -->
+        <div class="section" id="anomalies">
             <h2>Anomalies in the System</h2>
             <table>
                 <thead>
@@ -406,18 +212,31 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for anomaly in anomalies %}
+                    {% for anomaly in anomalies.values %}
                     <tr>
                         <td>{{ anomaly.ip_address }}</td>
                         <td>{{ anomaly.timestamp }}</td>
-                        <td>{{ anomaly.anomaly_data|json_script:"anomaly-data" }}</td>
-                        <td>{{ anomaly.feedback }}</td>
+                        <td>{{ anomaly.anomaly_data }}</td>
+                        <td>{{ anomaly.feedback|default:"Not Reviewed" }}</td>
                         <td>{{ anomaly.reviewed|yesno:"Yes,No" }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        <!-- Report Section -->
+        <div class="section" id="report">
+            <h2>System Report</h2>
+            <p>Report data and metrics will be displayed here, including any trends or key findings related to access logs and anomaly detection.</p>
+        </div>
+
+        <!-- Visualization Section -->
+        <div class="section" id="visualization">
+            <h2>Visualizations</h2>
+            <p>Charts and visual data based on metrics pulled from Prometheus or other sources will be visualized here.</p>
+        </div>
     </div>
+
 </body>
-</html> --> -->
+</html>

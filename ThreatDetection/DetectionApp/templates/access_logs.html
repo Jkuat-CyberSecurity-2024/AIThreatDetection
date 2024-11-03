@@ -2,84 +2,151 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Access Logs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threat Detection Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* General styling */
         body {
-            --nav-height: 40px;
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
             display: flex;
-            flex-direction: column;
             height: 100vh;
+            color: #2e7d32;
             background-color: #e9ecef;
         }
-        .nav {
-            height: var(--nav-height);
-            padding: 0 10px;
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 250px;
+            background-color: #1b5e20;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar a {
+            width: 100%;
+            padding: 15px;
+            text-decoration: none;
+            color: white;
             display: flex;
             align-items: center;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
+            font-size: 18px;
         }
-        .nav a {
-            text-decoration: none;
-            color: #007bff;
-            margin-right: 15px;
+
+        .sidebar a:hover, .sidebar a.active {
+            background-color: #388e3c;
         }
-        .upper-section, .lower-section {
-            flex: 1; /* Adjusted flex to 1 for equal distribution */
+
+        .sidebar i {
+            margin-right: 10px;
+        }
+
+        /* Content area */
+        .content-wrapper {
+            margin-left: 250px;
+            padding: 20px;
+            width: calc(100% - 250px);
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: 100vh;
+        }
+
+        .section {
             padding: 20px;
             background-color: #f8f9fa;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
-            margin: 10px;
         }
-        .lower-section {
-            border-top: 1px solid #dee2e6;
+
+        .section h2 {
+            margin: 0;
+            margin-bottom: 15px;
+            color: #1b5e20;
         }
+
+        /* Table styling */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
         }
+
         th, td {
-            border: 1px solid #dddddd;
-            padding: 8px;
+            padding: 10px;
+            border: 1px solid #dee2e6;
             text-align: center;
+            font-size: 14px;
         }
+
         th {
-            background-color: #f2f2f2;
+            background-color: #f1f8e9;
             position: sticky;
             top: 0;
             z-index: 10;
         }
+
+        tr:nth-child(even) {
+            background-color: #f1f8e9;
+        }
+
         .anomaly {
             background-color: #f8d7da;
             color: #721c24;
         }
-        h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
+
+        /* Tooltip styling */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
         }
-        .content-wrapper {
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - var(--nav-height));
-            padding: 10px;
-            background-color: #e9ecef;
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
         }
     </style>
 </head>
 <body>
-    <div class="nav">
-        <a href="{% url 'access_logs' %}">View Access Logs</a>
-        <!-- <a href="{% url 'review_anomalies' %}">Review Anomalies</a> -->
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h2>Dashboard</h2>
+        <a href="{% url 'access_logs' %}" class="active"><i class="fas fa-file-alt"></i> Access Logs</a>
+        <a href="{% url 'review_anomalies' %}"><i class="fas fa-exclamation-circle"></i> Review Anomalies</a>
+        <a href="#report"><i class="fas fa-chart-line"></i> Report</a>
+        <a href="#visualization"><i class="fas fa-chart-pie"></i> Visualization</a>
     </div>
-    
+
+    <!-- Main Content Area -->
     <div class="content-wrapper">
-        <div class="upper-section">
+
+        <!-- Access Logs Section -->
+        <div class="section" id="access-logs">
             <h2>Top 10 Access Logs with Anomaly Status</h2>
             <table>
                 <thead>
@@ -118,7 +185,9 @@
                         <td>{{ log.backend_time }}</td>
                         <td>
                             {% if log.anomaly %}
-                                Anomaly
+                                <span class="tooltip">Anomaly
+                                    <span class="tooltip-text">Detected as potential threat</span>
+                                </span>
                             {% else %}
                                 Normal
                             {% endif %}
@@ -129,7 +198,8 @@
             </table>
         </div>
 
-        <div class="lower-section">
+        <!-- Anomalies Section -->
+        <div class="section" id="anomalies">
             <h2>Anomalies in the System</h2>
             <table>
                 <thead>
@@ -142,18 +212,31 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for anomaly in anomalies %}
+                    {% for anomaly in anomalies.values %}
                     <tr>
                         <td>{{ anomaly.ip_address }}</td>
                         <td>{{ anomaly.timestamp }}</td>
-                        <td>{{ anomaly.anomaly_data|json_script:"anomaly-data" }}</td>
-                        <td>{{ anomaly.feedback }}</td>
+                        <td>{{ anomaly.anomaly_data }}</td>
+                        <td>{{ anomaly.feedback|default:"Not Reviewed" }}</td>
                         <td>{{ anomaly.reviewed|yesno:"Yes,No" }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        <!-- Report Section -->
+        <div class="section" id="report">
+            <h2>System Report</h2>
+            <p>Report data and metrics will be displayed here, including any trends or key findings related to access logs and anomaly detection.</p>
+        </div>
+
+        <!-- Visualization Section -->
+        <div class="section" id="visualization">
+            <h2>Visualizations</h2>
+            <p>Charts and visual data based on metrics pulled from Prometheus or other sources will be visualized here.</p>
+        </div>
     </div>
+
 </body>
 </html>

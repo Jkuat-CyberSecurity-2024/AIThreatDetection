@@ -247,7 +247,7 @@
         },
         "patient_user_36": {
             "username": "patient_user_36",
-            "email": "patient_user_36_4488@example.com",
+            "email": "patient_user_36_6152@example.com",
             "password1": "PatientPass123",
             "password2": "PatientPass123",
             "user_type": "patient"
@@ -299,8 +299,8 @@
             "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTczMTA2ODQ1NiwiaWF0IjoxNzMwOTgyMDU2LCJqdGkiOiIzYTZjMGM4M2ZmOGE0NWY5ODJjY2EyMTczYTQ0ZmJkOSIsInVzZXJfaWQiOiIwZDY0MzYyZi1kYzc3LTRkNDUtOTJkNy1jNDZmMzExOGJlOWEifQ.QReTY9opJqJQiBAQfAz5IDY7oWsXuiW8ISkq3IrZoto"
         },
         "patient_user_36": {
-            "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMwOTgyNTczLCJpYXQiOjE3MzA5ODIyNzMsImp0aSI6IjU0NzI3ODg1M2MzYTQ5NjFhNGRjMTdjNjlkOWJjNzMyIiwidXNlcl9pZCI6IjFiMDcwNWMwLWI2OTYtNDE1Zi1iOTExLTFlN2RiNjc1ODU1YSJ9.-yBnrvrBS738jd4lSj_BIt1l0IWeyp1iTerpsoCmMUU",
-            "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTczMTA2ODY3MywiaWF0IjoxNzMwOTgyMjczLCJqdGkiOiI4NTg4NWFlMWUzNTg0MmUzYWE1NmE1NTkzNGYwMzBmNiIsInVzZXJfaWQiOiIxYjA3MDVjMC1iNjk2LTQxNWYtYjkxMS0xZTdkYjY3NTg1NWEifQ.nYY7qYE2iZ-UpqjP5re1TgMtbVYqWCaofK4mgE85kmg"
+            "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMwOTgyNjk4LCJpYXQiOjE3MzA5ODIzOTgsImp0aSI6IjMyNmM0ZDAyYzM3NzQ0MTlhMDlhYTUyNzFjNjRjYWE0IiwidXNlcl9pZCI6IjYyMmE0YjU0LWVhOGEtNGQzNC05ZmI0LWFlNTdjYWJiN2Q0MCJ9.8soROUIyawYABwjiPf0LwUadNBLtORlUvgYJQSlUpRU",
+            "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTczMTA2ODc5OCwiaWF0IjoxNzMwOTgyMzk4LCJqdGkiOiJhZTk1Y2Y4MDRkMjU0MTRhODM1MGZkNDU4OTI4Y2M5YyIsInVzZXJfaWQiOiI2MjJhNGI1NC1lYThhLTRkMzQtOWZiNC1hZTU3Y2FiYjdkNDAifQ.hY2aqfz7uVTr-ZX9ovFAZr4l2Q-oBb0XdGoR9D5JcP8"
         }
     }
 }

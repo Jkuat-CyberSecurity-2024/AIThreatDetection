@@ -39,6 +39,24 @@ def log_activity(message):
     with open(LOG_FILE, "a") as log_file:
         log_file.write(log_entry + "\n")
 
+# Helper function to make HTTP requests with retries
+def make_request(url, method='get', data=None):
+    for attempt in range(RETRY_LIMIT):
+        try:
+            if method.lower() == 'post':
+                response = requests.post(url, json=data)
+            elif method.lower() == 'patch':
+                response = requests.patch(url, json=data)
+            else:
+                response = requests.get(url)
+            
+            response.raise_for_status()
+            return response.json()
+        except RequestException as e:
+            log_activity(f"Error during {method.upper()} request to '{url}': {str(e)}")
+            time.sleep(2 ** attempt)
+    return None
+
 # Function to load user data from file
 def load_user_data():
     if Path(USER_DATA_FILE).exists():
@@ -112,6 +130,35 @@ def login_user(user_data, username):
         log_activity(f"Error during login of '{username}': {str(e)}")
         return None
 
+# Function to simulate random API traffic (e.g., get data, update data, etc.)
+def simulate_traffic(username, user_data, active_user_count):
+    access_token = login_user(user_data, username)
+    if access_token is None:
+        return
+
+    while True:
+        action = random.choices(
+            ["get_user_data", "update_user_data", "logout", "delete_user"],
+            weights=[0.6, 0.3, 0.05, 0.05],
+            k=1
+        )[0]
+
+        if action == "get_user_data":
+            get_user_data(username, access_token)
+        elif action == "update_user_data":
+            update_user_data(username, access_token)
+        elif action == "logout":
+            logout_user(username, access_token)
+            break
+        elif action == "delete_user":
+            delete_user(username, access_token)
+            active_user_count.value -= 1  # Decrease user count on deletion
+            break
+
+        delay = random.uniform(2, 10)
+        log_activity(f"User '{username}' waiting for {delay:.2f} seconds before next action...")
+        time.sleep(delay)
+
 # Function to get user data
 def get_user_data(username, access_token):
     headers = {"Authorization": f"Bearer {access_token}"}
@@ -170,36 +217,7 @@ def delete_user(username, access_token):
     except Exception as e:
         log_activity(f"Error deleting '{username}': {str(e)}")
 
-# Function to simulate random API traffic
-def simulate_traffic(username, user_data, active_user_count):
-    access_token = login_user(user_data, username)
-    if access_token is None:
-        return
-
-    while True:
-        action = random.choices(
-            ["get_user_data", "update_user_data", "logout", "delete_user"],
-            weights=[0.6, 0.3, 0.05, 0.05],
-            k=1
-        )[0]
-
-        if action == "get_user_data":
-            get_user_data(username, access_token)
-        elif action == "update_user_data":
-            update_user_data(username, access_token)
-        elif action == "logout":
-            logout_user(username, access_token)
-            break
-        elif action == "delete_user":
-            delete_user(username, access_token)
-            active_user_count.value -= 1  # Decrease user count on deletion
-            break
-
-        delay = random.uniform(2, 10)
-        log_activity(f"User '{username}' waiting for {delay:.2f} seconds before next action...")
-        time.sleep(delay)
-
-# Function to manage user creation and traffic simulation
+# Function to manage user creation and traffic simulation for multiple users
 def manage_traffic():
     user_data = load_user_data()
     active_user_count = Manager().Value('i', len(user_data["users"]))
@@ -221,24 +239,6 @@ def manage_traffic():
                 time.sleep(random.uniform(5, 15))  # Stagger user creation for variability
 
         time.sleep(5)  # Polling delay before checking user count again
-
-# Helper function to make HTTP requests with retries
-def make_request(url, method='get', data=None):
-    for attempt in range(RETRY_LIMIT):
-        try:
-            if method.lower() == 'post':
-                response = requests.post(url, json=data)
-            elif method.lower() == 'patch':
-                response = requests.patch(url, json=data)
-            else:
-                response = requests.get(url)
-            
-            response.raise_for_status()
-            return response.json()
-        except RequestException as e:
-            log_activity(f"Error during {method.upper()} request to '{url}': {str(e)}")
-            time.sleep(2 ** attempt)
-    return None
 
 if __name__ == "__main__":
     log_activity("Starting traffic generation...")

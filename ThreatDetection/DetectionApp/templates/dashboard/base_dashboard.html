@@ -1,0 +1,49 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Threat Detection Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Link to your custom CSS file -->
+    <link rel="stylesheet" href="{% static 'detectionapp/css/dashboard.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <h2 class="sidebar-title">Dashboard</h2>
+            <nav class="sidebar-nav">
+                <a href="{% url 'review_anomalies' %}" class="sidebar-link">
+                    <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                    <span>Review Anomalies</span>
+                </a>
+                <a href="{% url 'access_logs' %}" class="sidebar-link">
+                    <i class="fas fa-file-alt" aria-hidden="true"></i>
+                    <span>Logs</span>
+                </a>
+                <a href="{% url 'report' %}" class="sidebar-link">
+                    <i class="fas fa-chart-line" aria-hidden="true"></i>
+                    <span>Report</span>
+                </a>
+                <a href="{% url 'visualization' %}" class="sidebar-link">
+                    <i class="fas fa-chart-pie" aria-hidden="true"></i>
+                    <span>Visualization</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Link to your custom JS file -->
+    <script src="{% static 'detectionapp/js/dashboard.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

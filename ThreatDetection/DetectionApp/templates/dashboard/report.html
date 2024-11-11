@@ -1,0 +1,219 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block content %}
+<style>
+    .report-section {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background-color: #ffffff;
+        overflow: hidden;
+    }
+
+    .report-header {
+        background-color: #1b5e20;
+        padding: 20px;
+    }
+
+    .report-header h1 {
+        color: #ffffff;
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .report-controls {
+        background-color: #f1f8e9;
+        padding: 10px 20px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .report-dropdown {
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        background-color: #fff;
+        font-size: 14px;
+        width: 200px;
+    }
+
+    .table-container {
+        flex: 1;
+        overflow: auto;
+        padding-right: 20px; /* Add padding to the right */
+    }
+
+    .report-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .report-table th,
+    .report-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .report-table th {
+        background-color: #f1f8e9;
+        font-weight: bold;
+        color: #2e7d32;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .report-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .report-table td:last-child,
+    .report-table th:last-child {
+        padding-right: 20px; /* Add extra padding to the last column */
+    }
+
+    .view-button {
+        padding: 6px 12px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+    }
+
+    .view-button:hover {
+        background-color: #45a049;
+    }
+
+    @media (max-width: 768px) {
+        .report-dropdown {
+            width: 100%;
+        }
+
+        .table-container {
+            padding-right: 0;
+        }
+
+        .report-table th,
+        .report-table td {
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .report-table td:last-child,
+        .report-table th:last-child {
+            padding-right: 8px;
+        }
+
+        .view-button {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+    }
+</style>
+
+<div id="report" class="report-section">
+    <div class="report-header">
+        <h1>Threat Detection Report</h1>
+    </div>
+    <div class="report-controls">
+        <select id="reportType" class="report-dropdown" onchange="changeReportType()">
+            <option value="daily">Daily Report</option>
+            <option value="weekly">Weekly Report</option>
+            <option value="monthly">Monthly Report</option>
+        </select>
+    </div>
+    <div class="table-container">
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>Period</th>
+                    <th>Total Logs</th>
+                    <th>Anomalies Detected</th>
+                    <th>Threat Level</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="reportTableBody">
+                <!-- Table content will be dynamically populated -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function changeReportType() {
+        const reportType = document.getElementById('reportType').value;
+        fetchReportData(reportType);
+    }
+
+    function fetchReportData(reportType) {
+        let mockData;
+        switch (reportType) {
+            case 'daily':
+                mockData = [
+                    { period: '2023-05-01', totalLogs: 10000, anomalies: 50, threatLevel: 'Low' },
+                    { period: '2023-05-02', totalLogs: 12000, anomalies: 75, threatLevel: 'Medium' },
+                    { period: '2023-05-03', totalLogs: 11000, anomalies: 60, threatLevel: 'Low' },
+                    { period: '2023-05-04', totalLogs: 13000, anomalies: 80, threatLevel: 'Medium' },
+                    { period: '2023-05-05', totalLogs: 11500, anomalies: 55, threatLevel: 'Low' },
+                    { period: '2023-05-06', totalLogs: 10800, anomalies: 45, threatLevel: 'Low' },
+                    { period: '2023-05-07', totalLogs: 12500, anomalies: 70, threatLevel: 'Medium' },
+                    { period: '2023-05-08', totalLogs: 11200, anomalies: 65, threatLevel: 'Low' },
+                    { period: '2023-05-09', totalLogs: 12800, anomalies: 85, threatLevel: 'Medium' },
+                    { period: '2023-05-10', totalLogs: 13500, anomalies: 90, threatLevel: 'High' },
+                ];
+                break;
+            case 'weekly':
+                mockData = [
+                    { period: 'Week 18', totalLogs: 70000, anomalies: 350, threatLevel: 'Medium' },
+                    { period: 'Week 19', totalLogs: 75000, anomalies: 400, threatLevel: 'High' },
+                    { period: 'Week 20', totalLogs: 72000, anomalies: 380, threatLevel: 'Medium' },
+                    { period: 'Week 21', totalLogs: 68000, anomalies: 320, threatLevel: 'Low' },
+                    { period: 'Week 22', totalLogs: 71000, anomalies: 360, threatLevel: 'Medium' },
+                    { period: 'Week 23', totalLogs: 73000, anomalies: 390, threatLevel: 'Medium' },
+                    { period: 'Week 24', totalLogs: 76000, anomalies: 410, threatLevel: 'High' },
+                ];
+                break;
+            case 'monthly':
+                mockData = [
+                    { period: 'January 2023', totalLogs: 300000, anomalies: 1500, threatLevel: 'Medium' },
+                    { period: 'February 2023', totalLogs: 280000, anomalies: 1400, threatLevel: 'Low' },
+                    { period: 'March 2023', totalLogs: 310000, anomalies: 1600, threatLevel: 'Medium' },
+                    { period: 'April 2023', totalLogs: 320000, anomalies: 1700, threatLevel: 'High' },
+                    { period: 'May 2023', totalLogs: 315000, anomalies: 1650, threatLevel: 'Medium' },
+                    { period: 'June 2023', totalLogs: 325000, anomalies: 1750, threatLevel: 'High' },
+                ];
+                break;
+        }
+
+        updateTable(mockData);
+    }
+
+    function updateTable(data) {
+        const tableBody = document.getElementById('reportTableBody');
+        tableBody.innerHTML = '';
+
+        data.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row.period}</td>
+                <td>${row.totalLogs.toLocaleString()}</td>
+                <td>${row.anomalies.toLocaleString()}</td>
+                <td>${row.threatLevel}</td>
+                <td><button class="view-button" onclick="viewReport('${row.period}')">View</button></td>
+            `;
+            tableBody.appendChild(tr);
+        });
+    }
+
+    function viewReport(period) {
+        alert(`Viewing detailed report for ${period}`);
+    }
+
+    // Initialize the table with daily report data
+    fetchReportData('daily');
+</script>
+{% endblock %}

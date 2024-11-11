@@ -1,19 +1,20 @@
 from django.shortcuts import render
-from rest_framework import viewsets, filters
-from rest_framework.response import Response
-from rest_framework.decorators import action
 from django.http import JsonResponse, HttpResponse
 from django.views import View
 import csv
 import json
-import os
 from .models import ThreatData
 from .serializers import ThreatDataSerializer
+from rest_framework import viewsets, filters
+from rest_framework.response import Response
+from rest_framework.decorators import action
+import os
+
 # Define paths
-CSV_FILE_PATH = r'C:\Users\karan\OneDrive\Documents\GitHub\AIThreatDetection\ThreatDetection\detected_anomalies.csv'
-FEEDBACK_FILE_PATH = r'C:\Users\karan\OneDrive\Documents\GitHub\AIThreatDetection\ThreatDetection\anomaly_feedback.json'
+CSV_FILE_PATH = r'D:\Attacho\Hackathon\Cybertec\AIThreatDetection\ThreatDetection\detected_anomalies.csv'
+FEEDBACK_FILE_PATH = r'D:\Attacho\Hackathon\Cybertec\AIThreatDetection\ThreatDetection\anomaly_feedback.json'
 
-
+# ThreatData ViewSet
 class ThreatDataViewSet(viewsets.ModelViewSet):
     queryset = ThreatData.objects.all()
     serializer_class = ThreatDataSerializer
@@ -30,47 +31,33 @@ class ThreatDataViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         processed = self.request.query_params.get('processed')
-        queryset = ThreatData.objects.filter(processed=processed) if processed is not None else ThreatData.objects.all()
-        return queryset
+        if processed is not None:
+            return ThreatData.objects.filter(processed=processed)
+        return ThreatData.objects.all()
 
-
+# Utility function to load anomalies
 def load_anomalies(feedback_file):
     """Load anomalies from JSON feedback file."""
+    anomalies = {}
     try:
         with open(feedback_file, "r") as f:
-            anomalies = [json.loads(line) for line in f]
-        # Use dictionary comprehension for faster lookups
-        return {anomaly['ip_address']: anomaly for anomaly in anomalies if 'ip_address' in anomaly}
+            for line in f:
+                anomaly = json.loads(line)
+                if 'ip_address' in anomaly:
+                    anomalies[anomaly['ip_address']] = anomaly
     except FileNotFoundError:
-        return {}
+        print(f"Feedback file not found: {feedback_file}")
+    return anomalies
 
-
+# Utility function to check for anomalies in logs
 def check_for_anomaly(log_entry, anomalies):
     """Check if a log entry has an anomaly."""
     ip_address = log_entry.get('ip_address')
     return ip_address in anomalies if ip_address else False
 
-
-def access_logs_view(request):
-    """Display access logs with anomalies marked."""
-    access_logs = []
-    anomalies = load_anomalies(FEEDBACK_FILE_PATH)
-
-    try:
-        with open(CSV_FILE_PATH, 'r') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                # Flag anomaly if IP matches
-                row['anomaly'] = check_for_anomaly(row, anomalies)
-                access_logs.append(row)
-    except FileNotFoundError:
-        return HttpResponse("Access logs file not found.", status=404)
-
-    return render(request, 'access_logs.html', {'access_logs': access_logs, 'anomalies': anomalies})
-
-
+# View for reviewing anomalies
 class ReviewAnomaliesView(View):
-    template_name = 'review_anomalies.html'
+    template_name = 'dashboard/anomalies.html'
 
     def get(self, request):
         """Display anomalies for review."""
@@ -84,7 +71,6 @@ class ReviewAnomaliesView(View):
         updated_entries = []
 
         for ip, anomaly in anomalies.items():
-            # Only update if anomaly has not been reviewed
             if not anomaly.get("reviewed", False):
                 feedback = feedback_data.get(ip)
                 if feedback in ["true_positive", "false_positive"]:
@@ -92,10 +78,46 @@ class ReviewAnomaliesView(View):
                     anomaly["reviewed"] = True
             updated_entries.append(anomaly)
 
-        # Write back updated anomalies
         with open(FEEDBACK_FILE_PATH, "w") as f:
             for entry in updated_entries:
                 json.dump(entry, f)
                 f.write("\n")
 
         return JsonResponse({'message': 'All anomalies reviewed successfully.'})
+
+# View for accessing logs
+def access_logs_view(request):
+    """Display access logs with anomalies marked."""
+    access_logs = []
+    anomalies = load_anomalies(FEEDBACK_FILE_PATH)
+
+    try:
+        with open(CSV_FILE_PATH, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                row['anomaly'] = check_for_anomaly(row, anomalies)
+                access_logs.append(row)
+    except FileNotFoundError:
+        return HttpResponse("Access logs file not found.", status=404)
+
+    return render(request, 'dashboard/logs.html', {'access_logs': access_logs, 'anomalies': anomalies})
+
+# View for generating reports
+def report_view(request):
+    return render(request, 'dashboard/report.html')
+
+# View for data visualization
+def visualization_view(request):
+    return render(request, 'dashboard/visualization.html')
+
+def daily_report_view(request):
+    # Logic for the daily report
+    return render(request, 'reports/daily_report.html')
+
+def weekly_report_view(request):
+    # Logic for the weekly report
+    return render(request, 'reports/weekly_report.html')
+
+def monthly_report_view(request):
+    # Logic for the monthly report
+    return render(request, 'reports/monthly_report.html')

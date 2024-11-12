@@ -9,7 +9,7 @@ from multiprocessing import Process, Lock, Manager
 from requests.exceptions import RequestException
 
 # Constants
-BASE_URL = os.getenv("BASE_URL", "http://localhost:80/")
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8010/secure/f94b03d3-92f7-4da0-908f-29bdaaffc420/")
 REGISTER_URL = f"{BASE_URL}register/"
 LOGIN_URL = f"{BASE_URL}login/"
 USER_DATA_URL = f"{BASE_URL}users/pk/"
@@ -18,8 +18,6 @@ LOGOUT_URL = f"{BASE_URL}logout/"
 DELETE_USER_URL = f"{BASE_URL}users/pk/"
 USER_DATA_FILE = "user_data.json"
 LOG_FILE = "user_registration_log.txt"
-MAX_USERS = 20
-MAX_USERS_PER_TYPE = int(os.getenv("MAX_USERS_PER_TYPE", 3))
 RETRY_LIMIT = 3
 
 # User template with example credentials
@@ -131,10 +129,13 @@ def login_user(user_data, username):
         return None
 
 # Function to simulate random API traffic (e.g., get data, update data, etc.)
-def simulate_traffic(username, user_data, active_user_count):
+def simulate_traffic(username, user_data):
     access_token = login_user(user_data, username)
     if access_token is None:
         return
+
+    # Random wait time before starting interactions
+    time.sleep(random.uniform(5, 15))
 
     while True:
         action = random.choices(
@@ -152,12 +153,17 @@ def simulate_traffic(username, user_data, active_user_count):
             break
         elif action == "delete_user":
             delete_user(username, access_token)
-            active_user_count.value -= 1  # Decrease user count on deletion
             break
 
+        # Randomized delay between actions
         delay = random.uniform(2, 10)
         log_activity(f"User '{username}' waiting for {delay:.2f} seconds before next action...")
         time.sleep(delay)
+
+        # Random deletion after a certain period
+        if random.random() < 0.01:  # 1% chance of deletion at each action
+            delete_user(username, access_token)
+            break
 
 # Function to get user data
 def get_user_data(username, access_token):
@@ -220,25 +226,19 @@ def delete_user(username, access_token):
 # Function to manage user creation and traffic simulation for multiple users
 def manage_traffic():
     user_data = load_user_data()
-    active_user_count = Manager().Value('i', len(user_data["users"]))
 
     while True:
         user_data = load_user_data()
-        
-        if active_user_count.value < MAX_USERS:
-            for user_type in user_template.keys():
-                if active_user_count.value >= MAX_USERS:
-                    break
 
-                username = create_user(user_data, user_type)
-                if username:
-                    p = Process(target=simulate_traffic, args=(username, user_data, active_user_count))
-                    p.start()
-                    active_user_count.value += 1
+        # Simulate user creation with random delays
+        user_type = random.choice(list(user_template.keys()))
+        username = create_user(user_data, user_type)
+        if username:
+            p = Process(target=simulate_traffic, args=(username, user_data))
+            p.start()
 
-                time.sleep(random.uniform(5, 15))  # Stagger user creation for variability
-
-        time.sleep(5)  # Polling delay before checking user count again
+        # Random delay before creating the next user
+        time.sleep(random.uniform(5, 15))
 
 if __name__ == "__main__":
     log_activity("Starting traffic generation...")

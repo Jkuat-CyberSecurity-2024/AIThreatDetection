@@ -51,12 +51,12 @@
         .content-wrapper {
             margin-left: 250px;
             padding: 20px;
-            width: calc(100% - 250px);
+            width: calc(100% - 290px);
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 20px;
-            height: 100vh;
+            height: calc(100vh - 40px);
         }
 
         .section {
@@ -73,26 +73,34 @@
         }
 
         /* Table styling */
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
         }
 
-        th, td {
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0;
+        }
+
+        .table-container th, .table-container td {
             padding: 10px;
             border: 1px solid #dee2e6;
-            text-align: center;
+            text-align: left;
             font-size: 14px;
         }
 
-        th {
+        .table-container thead th {
             background-color: #f1f8e9;
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
-        tr:nth-child(even) {
+        .table-container tr:nth-child(even) {
             background-color: #f1f8e9;
         }
 
@@ -129,14 +137,29 @@
             visibility: visible;
             opacity: 1;
         }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+            }
+
+            .content-wrapper {
+                margin-left: 0;
+                width: 100%;
+                height: auto;
+            }
+        }
     </style>
 </head>
 <body>
 
     <!-- Sidebar Navigation -->
     <div class="sidebar">
-        <h2>Dashboard</h2>
-        <a href="{% url 'access_logs' %}" class="active"><i class="fas fa-file-alt"></i> Access Logs</a>
+        <h2>Dashboard</h2>        
+        <a href="{% url 'access_logs' %}" class="active"><i class="fas fa-file-alt"></i> Logs</a>
         <a href="{% url 'review_anomalies' %}"><i class="fas fa-exclamation-circle"></i> Review Anomalies</a>
         <a href="#report"><i class="fas fa-chart-line"></i> Report</a>
         <a href="#visualization"><i class="fas fa-chart-pie"></i> Visualization</a>
@@ -147,82 +170,86 @@
 
         <!-- Access Logs Section -->
         <div class="section" id="access-logs">
-            <h2>Top 10 Access Logs with Anomaly Status</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>IP Address</th>
-                        <th>Timestamp</th>
-                        <th>Method</th>
-                        <th>Resource</th>
-                        <th>Protocol</th>
-                        <th>Status Code</th>
-                        <th>Source Port</th>
-                        <th>Destination Port</th>
-                        <th>Origin Server</th>
-                        <th>Destination</th>
-                        <th>Response Code</th>
-                        <th>Response Time</th>
-                        <th>Backend Time</th>
-                        <th>Anomaly Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for log in access_logs|slice:":10" %}
-                    <tr class="{% if log.anomaly %}anomaly{% endif %}">
-                        <td>{{ log.ip_address }}</td>
-                        <td>{{ log.timestamp }}</td>
-                        <td>{{ log.method }}</td>
-                        <td>{{ log.resource }}</td>
-                        <td>{{ log.protocol }}</td>
-                        <td>{{ log.status_code }}</td>
-                        <td>{{ log.source_port }}</td>
-                        <td>{{ log.destination_port }}</td>
-                        <td>{{ log.origin_server }}</td>
-                        <td>{{ log.destination }}</td>
-                        <td>{{ log.response_code }}</td>
-                        <td>{{ log.response_time }}</td>
-                        <td>{{ log.backend_time }}</td>
-                        <td>
-                            {% if log.anomaly %}
-                                <span class="tooltip">Anomaly
-                                    <span class="tooltip-text">Detected as potential threat</span>
-                                </span>
-                            {% else %}
-                                Normal
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <h2>Access Logs with Anomaly Status</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>IP Address</th>
+                            <th>Timestamp</th>
+                            <th>Method</th>
+                            <th>Resource</th>
+                            <th>Protocol</th>
+                            <th>Status Code</th>
+                            <th>Source Port</th>
+                            <th>Destination Port</th>
+                            <th>Origin Server</th>
+                            <th>Destination</th>
+                            <th>Response Code</th>
+                            <th>Response Time</th>
+                            <th>Backend Time</th>
+                            <th>Anomaly Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in access_logs %}
+                        <tr class="{% if log.anomaly %}anomaly{% endif %}">
+                            <td>{{ log.ip_address }}</td>
+                            <td>{{ log.timestamp }}</td>
+                            <td>{{ log.method }}</td>
+                            <td>{{ log.resource }}</td>
+                            <td>{{ log.protocol }}</td>
+                            <td>{{ log.status_code }}</td>
+                            <td>{{ log.source_port }}</td>
+                            <td>{{ log.destination_port }}</td>
+                            <td>{{ log.origin_server }}</td>
+                            <td>{{ log.destination }}</td>
+                            <td>{{ log.response_code }}</td>
+                            <td>{{ log.response_time }}</td>
+                            <td>{{ log.backend_time }}</td>
+                            <td>
+                                {% if log.anomaly %}
+                                    <span class="tooltip">Anomaly
+                                        <span class="tooltip-text">Detected as potential threat</span>
+                                    </span>
+                                {% else %}
+                                    Normal
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Anomalies Section -->
         <div class="section" id="anomalies">
             <h2>Anomalies in the System</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>IP Address</th>
-                        <th>Timestamp</th>
-                        <th>Anomaly Details</th>
-                        <th>Feedback</th>
-                        <th>Reviewed</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for anomaly in anomalies.values %}
-                    <tr>
-                        <td>{{ anomaly.ip_address }}</td>
-                        <td>{{ anomaly.timestamp }}</td>
-                        <td>{{ anomaly.anomaly_data }}</td>
-                        <td>{{ anomaly.feedback|default:"Not Reviewed" }}</td>
-                        <td>{{ anomaly.reviewed|yesno:"Yes,No" }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>IP Address</th>
+                            <th>Timestamp</th>
+                            <th>Anomaly Details</th>
+                            <th>Feedback</th>
+                            <th>Reviewed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for anomaly in anomalies.values %}
+                        <tr>
+                            <td>{{ anomaly.ip_address }}</td>
+                            <td>{{ anomaly.timestamp }}</td>
+                            <td>{{ anomaly.anomaly_data }}</td>
+                            <td>{{ anomaly.feedback|default:"Not Reviewed" }}</td>
+                            <td>{{ anomaly.reviewed|yesno:"Yes,No" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Report Section -->

@@ -107,9 +107,9 @@
 
     <!-- Sidebar Navigation -->
     <div class="sidebar">
-        <h2>Dashboard</h2>
-        <a href="{% url 'review_anomalies' %}"><i class="fas fa-exclamation-circle"></i> Review Anomalies</a>
+        <h2>Dashboard</h2>        
         <a href="{% url 'access_logs' %}"><i class="fas fa-file-alt"></i> Logs</a>
+        <a href="{% url 'review_anomalies' %}"><i class="fas fa-exclamation-circle"></i> Review Anomalies</a>
         <a href="#report" onclick="showSection('report')"><i class="fas fa-chart-line"></i> Report</a>
         <a href="#visualization" onclick="showSection('visualization')"><i class="fas fa-chart-pie"></i> Visualization</a>
     </div>
@@ -118,37 +118,36 @@
     <div class="content">
 
         <!-- Anomalies Section -->
-        <div id="anomalies" class="anomalies-section">
-            <h1>Review Anomalies</h1>
-            <!-- Existing anomalies table here -->
-            <table>
-                <thead>
-                    <tr>
-                        <th>IP Address</th>
-                        <th>Timestamp</th>
-                        <th>Data</th>
-                        <th>Feedback</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for anomaly in anomalies %}
+            <div id="anomalies" class="anomalies-section">
+                <h1>Review Anomalies</h1>
+                <table>
+                    <thead>
                         <tr>
-                            <td>{{ anomaly.ip_address }}</td>
-                            <td>{{ anomaly.timestamp }}</td>
-                            <td>{{ anomaly.anomaly_data }}</td>
-                            <td id="feedback_{{ anomaly.ip_address }}">
-                                {% if anomaly.reviewed %}
-                                    {{ anomaly.feedback|title }}
-                                {% else %}
-                                    <button class="true-positive-btn" onclick="submitFeedback('{{ anomaly.ip_address }}', 'true_positive')">True Positive</button>
-                                    <button class="false-positive-btn" onclick="submitFeedback('{{ anomaly.ip_address }}', 'false_positive')">False Positive</button>
-                                {% endif %}
-                            </td>
+                            <th>IP Address</th>
+                            <th>Timestamp</th>
+                            <th>Data</th>
+                            <th>Feedback</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        {% for anomaly in anomalies %}
+                            <tr>
+                                <td>{{ anomaly.ip_address }}</td>
+                                <td>{{ anomaly.timestamp }}</td>
+                                <td>{{ anomaly.anomaly_data }}</td>
+                                <td id="feedback_{{ anomaly.ip_address }}">
+                                    {% if anomaly.reviewed %}
+                                        {{ anomaly.feedback|title }}
+                                    {% else %}
+                                        <button class="true-positive-btn" onclick="submitFeedback('{{ anomaly.ip_address }}', 'true_positive')">True Positive</button>
+                                        <button class="false-positive-btn" onclick="submitFeedback('{{ anomaly.ip_address }}', 'false_positive')">False Positive</button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
         <!-- Logs Section -->
         <div id="logs" class="logs-section" style="display: none;">
@@ -201,6 +200,25 @@
                 // Use data for charting/visualization (e.g., plot with Chart.js or D3.js)
             }
         }
+
+        function submitFeedback(ipAddress, feedback) {
+        fetch('/api/review-anomalies/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ [ipAddress]: feedback })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === 'All anomalies reviewed successfully.') {
+                // Update feedback display in the table row
+                document.getElementById(`feedback_${ipAddress}`).innerHTML = feedback.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
     </script>
 
 </body>

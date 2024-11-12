@@ -1,61 +1,24 @@
 {
     "users": {
-        "admin_user_2": {
-            "username": "admin_user_2",
-            "email": "admin_user_2_3930@example.com",
+        "admin_user_1": {
+            "username": "admin_user_1",
+            "email": "admin_user_1_3038@example.com",
             "password1": "AdminPass123",
             "password2": "AdminPass123",
             "user_type": "admin"
         },
         "patient_user_2": {
             "username": "patient_user_2",
-            "email": "patient_user_2_1443@example.com",
-            "password1": "PatientPass123",
-            "password2": "PatientPass123",
-            "user_type": "patient"
-        },
-        "provider_user_3": {
-            "username": "provider_user_3",
-            "email": "provider_user_3_7820@example.com",
-            "password1": "ProviderPass123",
-            "password2": "ProviderPass123",
-            "user_type": "provider"
-        },
-        "provider_user_6": {
-            "username": "provider_user_6",
-            "email": "provider_user_6_5990@example.com",
-            "password1": "ProviderPass123",
-            "password2": "ProviderPass123",
-            "user_type": "provider"
-        },
-        "patient_user_7": {
-            "username": "patient_user_7",
-            "email": "patient_user_7_1756@example.com",
+            "email": "patient_user_2_5314@example.com",
             "password1": "PatientPass123",
             "password2": "PatientPass123",
             "user_type": "patient"
         }
     },
     "tokens": {
-        "admin_user_2": {
-            "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMxMzkwODMyLCJpYXQiOjE3MzEzOTA1MzIsImp0aSI6ImNmNjg0MjQwODY0NjQ0MDM4ODBjM2FlMmFjOTQ4NjVmIiwidXNlcl9pZCI6IjI1YmY1ODk5LTJhNmMtNDk3Zi1iMWIxLTYzNWU0NzgzYzUxYyJ9.2Uvc0fPbxNDQisDgw14tfK5YjlCddsY4w06-NxHwxjU",
-            "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTczMTQ3NjkzMiwiaWF0IjoxNzMxMzkwNTMyLCJqdGkiOiI1NGVhNDVhMDE4NjU0NjliOWVhNDU4MTJhMTlkOTMwNCIsInVzZXJfaWQiOiIyNWJmNTg5OS0yYTZjLTQ5N2YtYjFiMS02MzVlNDc4M2M1MWMifQ.2xAzyle2ovFc3ZFi_x2m5_y1A1qhrq4-txIN0lzZUs4"
-        },
-        "patient_user_2": {
-            "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMxMzkwODQ2LCJpYXQiOjE3MzEzOTA1NDYsImp0aSI6ImI3MTdmYjRiNzBmNjQ2MjRhYWEyNDE5YmFkYTg4MTUxIiwidXNlcl9pZCI6ImM4NDc1MmM4LWIxMTItNGI1NS1iMzFjLWQwNTVmN2NjNjRkMCJ9.E-P6EkBx7DmxHp_Adf3zQqdDrBLH1QLZIGCCMBIpAb0",
-            "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTczMTQ3Njk0NiwiaWF0IjoxNzMxMzkwNTQ2LCJqdGkiOiIxZjY3NGMzNTQzYzU0ZWEwOGNkNmVmMWJkNjc3MzRjOCIsInVzZXJfaWQiOiJjODQ3NTJjOC1iMTEyLTRiNTUtYjMxYy1kMDU1ZjdjYzY0ZDAifQ.b2oRRQYdu5HLuEr6WuAXMzWgSdx_ylMCgFKfKu6WhTU"
-        },
-        "provider_user_3": {
-            "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMxMzkwODYwLCJpYXQiOjE3MzEzOTA1NjAsImp0aSI6IjFmZTQ1NjhiMDQ4ZTRhN2RiNTg4Yjk4N2ExODRmY2IyIiwidXNlcl9pZCI6IjZmYThjZDM0LTFlNDUtNDI5NC04NWNhLTA1MjlkZWM0MTgyYyJ9.SjPC3ao58XwOOJp9FGgtc46pIbwrK2qKaNpgErf4G7U",
-            "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTczMTQ3Njk2MCwiaWF0IjoxNzMxMzkwNTYwLCJqdGkiOiJiMDRkZjhjNWVjNGI0Y2RlYjI1ODg3ZWVlYjdkMjg1YiIsInVzZXJfaWQiOiI2ZmE4Y2QzNC0xZTQ1LTQyOTQtODVjYS0wNTI5ZGVjNDE4MmMifQ.WmNrjmMYFJHkoQnLUbOCL_NoyVIvCmtR5TGzqb0TerY"
-        },
-        "provider_user_6": {
-            "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMxMzkwOTA1LCJpYXQiOjE3MzEzOTA2MDUsImp0aSI6IjU2NTRjOTQzNTE2MTQ3MDliOWU4MjI5ZmExYjMyZTc1IiwidXNlcl9pZCI6IjA5ZjkxMDAxLTZjMjItNDM0MS05NmViLTRlYWU0ZmFmMDE5MiJ9.FGubKiqj_Thock4vhxmns18FmxqasSLclwwIZef_4fM",
-            "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTczMTQ3NzAwNSwiaWF0IjoxNzMxMzkwNjA1LCJqdGkiOiJmZWZiOWMzMDA5YmY0OGRhYWIwMTBkNDE3ZmU1YTU3MiIsInVzZXJfaWQiOiIwOWY5MTAwMS02YzIyLTQzNDEtOTZlYi00ZWFlNGZhZjAxOTIifQ.BzEwrRYa6yeuahOx_8nm5MN0BxqZkbZ2fbmArFBfkY4"
-        },
-        "patient_user_7": {
-            "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMxMzkwOTQyLCJpYXQiOjE3MzEzOTA2NDIsImp0aSI6ImEwMWFmYWVlNzFhZDQ2NThiMjJlOTlhNGZkOTRjMjFiIiwidXNlcl9pZCI6ImUzYTNmYjZlLTMyNmQtNGZlYy1hYTExLWE2ZDUxYzYxNjNmOSJ9.ilCDdaoIU2L9kFiu3NwSlHDcSetKnfzqsVrdB5jjJ5k",
-            "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTczMTQ3NzA0MiwiaWF0IjoxNzMxMzkwNjQyLCJqdGkiOiI1YjkzOGJiZTFjM2I0MDNmOGE1NTU3Zjg2YzU4N2YyYSIsInVzZXJfaWQiOiJlM2EzZmI2ZS0zMjZkLTRmZWMtYWExMS1hNmQ1MWM2MTYzZjkifQ.frp7JS-6kltRZH6ufGejSVM4PD8rFvibtjl3MB6AKlo"
+        "admin_user_1": {
+            "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMxMzk4MjY1LCJpYXQiOjE3MzEzOTc5NjUsImp0aSI6IjczNmQxYmU0MjIxMDRhMmRiNmM2YTViYTc4Y2IyODkwIiwidXNlcl9pZCI6ImI0YjRhNTEyLTQzM2ItNDcyOS1iOTExLTllNTAxZWNlYjE0ZSJ9.GthrX5G7eo3jcJZszTehL9CSPpt2OPdCjrqyv4x05_Y",
+            "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTczMTQ4NDM2NSwiaWF0IjoxNzMxMzk3OTY1LCJqdGkiOiJjNTg5YWI0YmRhYWY0YmM2YmI0N2M0YTc0ZTA2ZDQ4MyIsInVzZXJfaWQiOiJiNGI0YTUxMi00MzNiLTQ3MjktYjkxMS05ZTUwMWVjZWIxNGUifQ.yh1cPrli2FPl309Z-t9FBZ4exl2dH_mKU4jSyx3W2UU"
         }
     }
 }

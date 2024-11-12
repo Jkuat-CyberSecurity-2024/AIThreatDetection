@@ -9,7 +9,7 @@ from multiprocessing import Process, Lock, Manager
 from requests.exceptions import RequestException
 
 # Constants
-BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8010/secure/f94b03d3-92f7-4da0-908f-29bdaaffc420/")
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/")
 REGISTER_URL = f"{BASE_URL}register/"
 LOGIN_URL = f"{BASE_URL}login/"
 USER_DATA_URL = f"{BASE_URL}users/pk/"

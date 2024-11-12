@@ -29,6 +29,22 @@ services:
         reservations:
           cpus: "0.2"
           memory: "256M"
+  anomaly-detection:
+      build: ./Anomaly_Detector/anomaly-detection  # Build the anomaly detection image from Dockerfile in the ./anomaly-detection directory
+      volumes:
+        - ./nginx/log:/var/log/nginx  # Shared volume for reading NGINX logs
+        - ./anomaly-detection:/app  # Mount anomaly detection scripts
+      depends_on:
+        - nginx
+      environment:
+        - MODEL_PATH=/app/iso_forest_model.pkl
+        - SCALER_PATH=/app/scaler.pkl
+        - LOG_FILE_PATH=/var/log/nginx/access.log
+        - ANOMALY_LOG_PATH=/app/anomaly_feedback.json
+      networks:
+        - backend-network
+      privileged: true
+      restart: always
 
   nginx_prometheus_exporter:
     image: nginx/nginx-prometheus-exporter:latest

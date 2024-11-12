@@ -1,3 +1,0 @@
-[2024-11-01 10:56:21] Starting traffic generation...
-[2024-11-01 10:56:23] Error during POST request to 'http://localhost:80/register/': 500 Server Error: Internal Server Error for url: http://localhost:80/register/
-[2024-11-01 10:56:24] Error during POST request to 'http://localhost:80/register/': 500 Server Error: Internal Server Error for url: http://localhost:80/register/

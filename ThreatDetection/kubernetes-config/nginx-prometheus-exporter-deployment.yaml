@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: C:\Users\karan\kompose\kompose.exe convert -o ./kubernetes-config/
+    kompose.version: 1.34.0 (cbf2835db)
+  labels:
+    io.kompose.service: nginx-prometheus-exporter
+  name: nginx-prometheus-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: nginx-prometheus-exporter
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: C:\Users\karan\kompose\kompose.exe convert -o ./kubernetes-config/
+        kompose.version: 1.34.0 (cbf2835db)
+      labels:
+        io.kompose.service: nginx-prometheus-exporter
+    spec:
+      containers:
+        - args:
+            - -nginx.scrape-uri=http://nginx/stub_status
+          image: nginx/nginx-prometheus-exporter:latest
+          livenessProbe:
+            exec:
+              command:
+                - curl
+                - -f
+                - http://localhost:9113/metrics
+            failureThreshold: 3
+            periodSeconds: 30
+            timeoutSeconds: 10
+          name: nginx-prometheus-exporter
+          ports:
+            - containerPort: 9113
+              protocol: TCP
+      restartPolicy: Always

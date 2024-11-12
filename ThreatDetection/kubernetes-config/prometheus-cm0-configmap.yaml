@@ -1,0 +1,24 @@
+apiVersion: v1
+data:
+  prometheus.yml: |
+    scrape_configs:
+      - job_name: 'nginx'
+        static_configs:
+          - targets: ['nginx_prometheus_exporter:9113']
+
+      - job_name: 'django'
+        metrics_path: '/metrics'  # Specify Django metrics path
+        static_configs:
+          - targets: ['django-1:8000', 'django-2:8000', 'django-3:8000']
+
+      - job_name: 'redis'
+        metrics_path: '/metrics'  # Adjust if Redis Exporter has a different path
+        static_configs:
+          - targets: ['redis_exporter:9121']  # Target the Redis Exporter
+kind: ConfigMap
+metadata:
+  annotations:
+    use-subpath: "true"
+  labels:
+    io.kompose.service: prometheus
+  name: prometheus-cm0

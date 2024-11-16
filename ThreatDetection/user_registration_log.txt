@@ -3,3 +3,67 @@
 [2024-11-12 10:52:46] User 'admin_user_1' logged in successfully. Tokens stored.
 [2024-11-12 10:52:53] User 'admin_user_1' deleted successfully.
 [2024-11-12 10:52:56] User 'patient_user_2' created successfully.
+[2024-11-12 11:03:12] Starting traffic generation...
+[2024-11-12 11:03:14] Error during POST request to 'http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/': 500 Server Error: Internal Server Error for url: http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/
+[2024-11-12 11:03:16] Error during POST request to 'http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/': 500 Server Error: Internal Server Error for url: http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/
+[2024-11-12 11:03:18] Error during POST request to 'http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/': 500 Server Error: Internal Server Error for url: http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/
+[2024-11-12 11:03:22] Failed to create user 'provider_user_3': No response
+[2024-11-12 11:03:29] Error during POST request to 'http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/': 500 Server Error: Internal Server Error for url: http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/
+[2024-11-12 11:03:30] Error during POST request to 'http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/': 500 Server Error: Internal Server Error for url: http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/
+[2024-11-12 11:03:32] Error during POST request to 'http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/': 500 Server Error: Internal Server Error for url: http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/
+[2024-11-12 11:03:36] Failed to create user 'patient_user_3': No response
+[2024-11-12 11:05:14] Starting traffic generation...
+[2024-11-12 11:05:15] Error during POST request to 'http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/': 500 Server Error: Internal Server Error for url: http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/
+[2024-11-12 11:05:17] Error during POST request to 'http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/': 500 Server Error: Internal Server Error for url: http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/
+[2024-11-12 11:05:19] Error during POST request to 'http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/': 500 Server Error: Internal Server Error for url: http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/
+[2024-11-12 11:05:53] Starting traffic generation...
+[2024-11-12 11:05:57] Error during POST request to 'http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/': 403 Client Error: Forbidden for url: http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/
+[2024-11-12 11:06:01] Error during POST request to 'http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/': 403 Client Error: Forbidden for url: http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/
+[2024-11-12 11:06:06] Error during POST request to 'http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/': 403 Client Error: Forbidden for url: http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/
+[2024-11-12 11:07:27] Starting traffic generation...
+[2024-11-12 11:07:27] Error during POST request to 'http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/': 400 Client Error: Bad Request for url: http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/
+[2024-11-12 11:07:29] Error during POST request to 'http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/': 400 Client Error: Bad Request for url: http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/
+[2024-11-12 11:07:32] Error during POST request to 'http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/': 400 Client Error: Bad Request for url: http://127.0.0.1:8010/secure/470cf4e9-a5f9-4098-834b-17886328e173/register/
+[2024-11-12 11:07:36] Failed to create user 'provider_user_3': No response
+[2024-11-12 11:07:57] User 'patient_user_3' created successfully.
+[2024-11-12 11:07:59] User 'patient_user_3' logged in successfully. Tokens stored.
+[2024-11-12 11:08:04] Failed to fetch data for user 'patient_user_3': <html>
+<head><title>400 Bad Request</title></head>
+<body>
+<center><h1>400 Bad Request</h1></center>
+<hr><center>nginx/1.27.2</center>
+</body>
+</html>
+
+[2024-11-12 11:08:04] User 'patient_user_3' waiting for 3.66 seconds before next action...
+[2024-11-12 11:08:06] User 'patient_user_4' created successfully.
+[2024-11-12 11:08:08] User 'patient_user_4' logged in successfully. Tokens stored.
+[2024-11-12 11:08:08] Failed to fetch data for user 'patient_user_3': <html>
+<head><title>400 Bad Request</title></head>
+<body>
+<center><h1>400 Bad Request</h1></center>
+<hr><center>nginx/1.27.2</center>
+</body>
+</html>
+
+[2024-11-12 11:08:08] User 'patient_user_3' waiting for 9.78 seconds before next action...
+[2024-11-12 11:08:17] User 'admin_user_5' created successfully.
+[2024-11-12 11:08:18] Failed to fetch data for user 'patient_user_3': <html>
+<head><title>400 Bad Request</title></head>
+<body>
+<center><h1>400 Bad Request</h1></center>
+<hr><center>nginx/1.27.2</center>
+</body>
+</html>
+
+[2024-11-12 11:08:18] User 'patient_user_3' waiting for 9.48 seconds before next action...
+[2024-11-12 11:08:18] User 'admin_user_5' logged in successfully. Tokens stored.
+[2024-11-12 11:08:19] Failed to fetch data for user 'patient_user_4': <html>
+<head><title>400 Bad Request</title></head>
+<body>
+<center><h1>400 Bad Request</h1></center>
+<hr><center>nginx/1.27.2</center>
+</body>
+</html>
+
+[2024-11-12 11:08:19] User 'patient_user_4' waiting for 7.15 seconds before next action...
